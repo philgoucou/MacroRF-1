@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Macroeconomic Random Forest &mdash; Macro Random Forest 1.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="How it works" href="how_it_works.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="#" class="icon icon-home"> Macro Random Forest
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="how_it_works.html">How it works</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">Macro Random Forest</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+      <li>Macroeconomic Random Forest</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="macroeconomic-random-forest">
+<span id="main"></span><h1>Macroeconomic Random Forest<a class="headerlink" href="#macroeconomic-random-forest" title="Permalink to this headline"></a></h1>
+<img alt="_images/MaRF_logo.svg" src="_images/MaRF_logo.svg" /><embed>
+     <p align="center">
+         <a href="https://www.python.org/">
+             <img src="./_static/svg/R_button.svg"
+                 width="77" height="12" alt="python"></a> &nbsp;
+         <a href="https://www.python.org/">
+             <img src="./_static/svg/Python_button.svg"
+                 width="100" height="30" alt="python"></a> &nbsp;
+         <a href="">
+             <img src="./_static/svg/MRF_button.svg"
+                 alt="MRF" width="108" height="30"></a> &nbsp;
+         <a href="">
+             <img src="./_static/svg/Maintained_button.svg"
+                 alt="Maintained?" width="135" height="30"></a> &nbsp;
+     </p>
+</embed><p>Ever wanted the power of a Random Forest with the interpretability of a Linear Regression model? Well now you can…</p>
+<p>This code base is the official open-source Python implementation of “The Macroeconomy as a Random Forest (MRF)” by Philippe Goulet Coulombe. MRF is a time series modification of the canonical Random Forest Machine Learning algorithm. It uses a Random Forest to flexibly model time-varying parameters in a linear macro equation. This means that, unlike most Machine Learning methods, MRF is directly interpretable via its main output - what are known as Generalised Time Varying Parameters (GTVPs).</p>
+<p>The model has also shown forecasting gains over numerous alternatives and across many time series datasets. It is well suited to macroeconomic forecasting, but there are also many possible extensions to quantitative finance, or any other field of science with time series data. The full paper corresponding to the implementation can be found here: <a class="reference external" href="https://arxiv.org/abs/2006.12724">https://arxiv.org/abs/2006.12724</a></p>
+</section>
+<section id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h1>
+<section id="python">
+<h2>Python<a class="headerlink" href="#python" title="Permalink to this headline"></a></h2>
+<p>The recommended Python installation is via pip:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">MacroRandomForest</span>
+</pre></div>
+</div>
+<p>To install the package manually, you can do:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">RyanLucas3</span><span class="o">/</span><span class="n">MacroRandomForest</span>
+</pre></div>
+</div>
+<p>Now you’re ready to get started! Head over to <a class="reference internal" href="usage.html#usage"><span class="std std-ref">Usage</span></a> to find out how to implement MRF.</p>
+</section>
+<section id="r">
+<h2>R<a class="headerlink" href="#r" title="Permalink to this headline"></a></h2>
+<p>To install the package in R, simply run the following commands:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">install.packages</span><span class="p">(</span><span class="s">&#39;devtools&#39;</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="n">devtools</span><span class="p">)</span>
+<span class="nf">install_github</span><span class="p">(</span><span class="s">&quot;philgoucou/macrorf&quot;</span><span class="p">);</span>
+<span class="nf">library</span><span class="p">(</span><span class="n">MacroRF</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This documentation contains detailed information about the implementation of the Python version, with less detail for R.</p>
+<p>Still, the implementation is simple and the same guidelines for hyperparameter selection will apply to both versions. Head over to  <a class="reference internal" href="usage.html#usage"><span class="std std-ref">Usage</span></a> for more details.</p>
+</div>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="how_it_works.html">How it works</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="how_it_works.html#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_it_works.html#random-walk-regularisation">Random Walk Regularisation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="how_it_works.html#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Docs</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="MRF.html">MRF module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Evaluation.html">Evaluation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Helper.html">Helper module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="usage.html#implementation-example">Implementation Example</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+</section>
+<section id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="how_it_works.html" class="btn btn-neutral float-right" title="How it works" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Philippe Goulet Coulombe and Ryan Lucas.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

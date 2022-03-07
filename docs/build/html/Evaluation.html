@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Evaluation module &mdash; Macro Random Forest 1.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Helper module" href="Helper.html" />
+    <link rel="prev" title="MRF module" href="MRF.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> Macro Random Forest
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="how_it_works.html">How it works</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Docs</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="MRF.html">MRF module</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Evaluation module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#statistical-evaluation-metrics">Statistical Evaluation Metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#financial-evaluation-metrics">Financial Evaluation Metrics</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-Evaluation">Code</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#references">References</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="Helper.html">Helper module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Macro Random Forest</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="modules.html">Docs</a> &raquo;</li>
+      <li>Evaluation module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/Evaluation.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="evaluation-module">
+<h1>Evaluation module<a class="headerlink" href="#evaluation-module" title="Permalink to this headline"></a></h1>
+<p>This module is used to evaluate the predictions of MRF. The following functions are called by the statistical_evaluation() and financial_evaluation() methods of the MRF module.</p>
+<section id="statistical-evaluation-metrics">
+<h2>Statistical Evaluation Metrics<a class="headerlink" href="#statistical-evaluation-metrics" title="Permalink to this headline"></a></h2>
+<p>As statistical evaluation metrics, we use the standard MAE and MSE:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align}
+MAE = \frac{1}{\vert T\vert} \sum_{t \in T} |\hat{y}_{t+k|t} - y_{t+k}| \\
+MSE = \frac{1}{\vert T\vert} \sum_{t \in T} (\hat{y}_{t+k|t} - y_{t+k})^2
+\end{align}\end{split}\]</div>
+<p>Where <span class="math notranslate nohighlight">\(k\)</span> is the forecast horizon and <span class="math notranslate nohighlight">\(\vert T\vert\)</span> is the cardinality of the index set <span class="math notranslate nohighlight">\(T\)</span>. In our case this index set is the specified out-of-sample observations.</p>
+</section>
+<section id="financial-evaluation-metrics">
+<h2>Financial Evaluation Metrics<a class="headerlink" href="#financial-evaluation-metrics" title="Permalink to this headline"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You should only use financial_evaluation() if your target variable is a financial return and you can provide the underlying tradable asset.</p>
+<p>This means the financial evaluation functions will be next to meaningless for macro forecasting.</p>
+</div>
+<p>As a method for the financial evaluation of MRF predictions, we use a trading strategy described in <a class="footnote-reference brackets" href="#id2" id="id1">1</a> to generate binary long/short market signals. This strategy is agnostic to the forecast horizon used. Our trading signal <span class="math notranslate nohighlight">\(S_t\)</span> becomes a weighted average of directional (up/down) signals obtained by our model.</p>
+<div class="math notranslate nohighlight">
+\[\begin{align}
+S_{t}:=\frac{1}{k} \times \sum_{j=0}^{k-1}\left(\mathbb{1}\left[\hat{y}_{t+k-j \mid t-j}&gt;0\right]-\mathbb{1}\left[\hat{y}_{t+k-j \mid t-j}&lt;0\right]\right)
+\end{align}\]</div>
+<p>Given <span class="math notranslate nohighlight">\(r_t\)</span> as the daily profit associated with the trading strategy and <span class="math notranslate nohighlight">\(T_{prof}\)</span>  as the index for profit calculation, with <span class="math notranslate nohighlight">\(T_{end}\)</span> as the last index in <span class="math notranslate nohighlight">\(T_{prof}\)</span>, we can calculate Annualised Return as follows:</p>
+<div class="math notranslate nohighlight">
+\[\begin{align}\label{pi_t}
+\Upsilon_{t} = \sum_{\tau \in [t]} r_\tau
+\end{align}\]</div>
+<div class="math notranslate nohighlight">
+\[\begin{align}\label{Annualised}
+ANR = \frac{252 \times \Upsilon_{T_{end}}}{\vert T_{prof} \vert}
+\end{align}\]</div>
+<p>Mean return <span class="math notranslate nohighlight">\(\bar{r}\)</span> and Sharpe Ratio <span class="math notranslate nohighlight">\(SR\)</span> are then calculated as follows:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{align}
+    \bar{r} = \frac{1}{{|T_{prof}|}} \times \sum_{t \in T_{prof}} r_t \\
+    SR = \sqrt{252} \times \frac{\bar{r}}{St Dev(\{r_t\}_{t \in T_{prof}})}
+\end{align}\end{split}\]</div>
+<p>Maximum drawdown, <span class="math notranslate nohighlight">\(MDD\)</span>, measures the maximum observed loss from a peak to a trough in the value of a holding. Representing the value of the portfolio to be <span class="math notranslate nohighlight">\(\Pi_t\)</span> = <span class="math notranslate nohighlight">\(\Upsilon_t + 1\)</span>, <span class="math notranslate nohighlight">\(MDD\)</span> is calculated as follows:</p>
+<div class="math notranslate nohighlight">
+\[\begin{align} \label{MDD}
+   MDD = \underset{t\in T_{prof}} \min \left\{  \frac{\Pi_t}{ \underset{\tau \in [t]} \max \left\{ \Pi_{\tau}\right\}} - 1\right\}
+\end{align}\]</div>
+</section>
+<section id="module-Evaluation">
+<span id="code"></span><h2>Code<a class="headerlink" href="#module-Evaluation" title="Permalink to this headline"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="Evaluation.collect_errors">
+<span class="sig-prename descclassname"><span class="pre">Evaluation.</span></span><span class="sig-name descname"><span class="pre">collect_errors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">oos_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">actual</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forecasts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Evaluation.collect_errors" title="Permalink to this definition"></a></dt>
+<dd><p>Collecting forecasting errors based on MRF forecasts and observed values of the target variable.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>oos_pos</strong> (<em>-</em>) – Represents OOS period of interst for statistical evaluation. Passed in automatically when MRF.statistical_evaluation() is called.</p></li>
+<li><p><strong>actual</strong> (<em>-</em>) – Actual (observed) values for the target variable over the OOS period. Passed in automatically when MRF.statistical_evaluation() is called.</p></li>
+<li><p><strong>forecasts</strong> (<em>-</em>) – k-period forecasted values for the target variable.</p></li>
+<li><p><strong>k</strong> (<em>-</em>) – Forecast horizon.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dictionary containing forecast errors corresponding to OOS period.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>errors (dict)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Evaluation.get_MAE">
+<span class="sig-prename descclassname"><span class="pre">Evaluation.</span></span><span class="sig-name descname"><span class="pre">get_MAE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">error_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oos_pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Evaluation.get_MAE" title="Permalink to this definition"></a></dt>
+<dd><p>Calculating Mean Absolute Error (MAE) based on collected forecasting errors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>error_dict</strong> (<em>-</em>) – List of forecasting errors obtained via collect_errors()</p></li>
+<li><p><strong>oos_pos</strong> (<em>-</em>) – Time indices of OOS period</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>MAE (float)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Evaluation.get_MSE">
+<span class="sig-prename descclassname"><span class="pre">Evaluation.</span></span><span class="sig-name descname"><span class="pre">get_MSE</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">error_dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oos_pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Evaluation.get_MSE" title="Permalink to this definition"></a></dt>
+<dd><p>Calculating Mean Squared Error (MSE) based on collected forecasting errors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>error_dict</strong> (<em>-</em>) – </p></li>
+<li><p><strong>oos_pos</strong> (<em>-</em>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>MSE (float)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Evaluation.get_annualised_return">
+<span class="sig-prename descclassname"><span class="pre">Evaluation.</span></span><span class="sig-name descname"><span class="pre">get_annualised_return</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cumulative_profit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">T_profit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Evaluation.get_annualised_return" title="Permalink to this definition"></a></dt>
+<dd><p>Calculating Annualised Return financial return metric.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>cumulative_profit</strong> (<em>-</em>) – Series corresponding to cumulative profit values obtained from financial_evaluation() and trading_strategy() functions.</p></li>
+<li><p><strong>T_profit</strong> (<em>-</em>) – Time indices corresponding to profit-generating period. Note this starts k days after OOS start, since we need a previous signal to generate profit!</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Yearly profit earned over OOS period</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>annualised_return (float)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Evaluation.get_max_dd_and_date">
+<span class="sig-prename descclassname"><span class="pre">Evaluation.</span></span><span class="sig-name descname"><span class="pre">get_max_dd_and_date</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cumulative_profit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Evaluation.get_max_dd_and_date" title="Permalink to this definition"></a></dt>
+<dd><p>Calculating Maximum Drawdown financial return metric.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>cumulative_profit</strong> (<em>-</em>) – Series corresponding to cumulative profit values obtained from financial_evaluation() and trading_strategy() functions</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Maximum Drawdown metric corresponding to OOS period</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>drawdown (float)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Evaluation.get_sharpe_ratio">
+<span class="sig-prename descclassname"><span class="pre">Evaluation.</span></span><span class="sig-name descname"><span class="pre">get_sharpe_ratio</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">daily_profit</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Evaluation.get_sharpe_ratio" title="Permalink to this definition"></a></dt>
+<dd><p>Calculating Sharpe Ratio financial return metric.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>daily_profit</strong> (<em>-</em>) – Series corresponding to daily profit values obtained from financial_evaluation() and trading_strategy() functions</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Sharpe Ratio corresponding to OOS period</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>sharpe_ratio (float)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="Evaluation.trading_strategy">
+<span class="sig-prename descclassname"><span class="pre">Evaluation.</span></span><span class="sig-name descname"><span class="pre">trading_strategy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_forecasts</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stock_price</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#Evaluation.trading_strategy" title="Permalink to this definition"></a></dt>
+<dd><p>Strategy for generating binary (long/short) trading signals based on MRF predictions. This strategy is agnostic to the forecast-horizon used.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>forecasts</strong> (<em>-</em>) – k-period forecasted values for the target variable.</p></li>
+<li><p><strong>stock_price</strong> (<em>-</em>) – Series of stock prices corresponding to target variable (returns) during same OOS period.</p></li>
+<li><p><strong>k</strong> (<em>-</em>) – Forecast horizon.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Backtested daily profit corresponding to implementing MRF trading signals.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>PL_t (pd.Series)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="references">
+<h2>References<a class="headerlink" href="#references" title="Permalink to this headline"></a></h2>
+<dl class="footnote brackets">
+<dt class="label" id="id2"><span class="brackets"><a class="fn-backref" href="#id1">1</a></span></dt>
+<dd><p>Ruogu Yang, Parley. Lucas, Ryan. Schelpe, Camilla. (2021). Adaptive Learning on Time Series: Method and Financial Applications. arXiv preprint arXiv: 2110.11156.</p>
+</dd>
+</dl>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="MRF.html" class="btn btn-neutral float-left" title="MRF module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Helper.html" class="btn btn-neutral float-right" title="Helper module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Philippe Goulet Coulombe and Ryan Lucas.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

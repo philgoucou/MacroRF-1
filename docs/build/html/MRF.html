@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MRF module &mdash; Macro Random Forest 1.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Evaluation module" href="Evaluation.html" />
+    <link rel="prev" title="Docs" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> Macro Random Forest
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="how_it_works.html">How it works</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Docs</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">MRF module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Evaluation.html">Evaluation module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Helper.html">Helper module</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Macro Random Forest</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="modules.html">Docs</a> &raquo;</li>
+      <li>MRF module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/MRF.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-MRF">
+<span id="mrf-module"></span><h1>MRF module<a class="headerlink" href="#module-MRF" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="MRF.MacroRandomForest">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">MRF.</span></span><span class="sig-name descname"><span class="pre">MacroRandomForest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">oos_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_pos</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minsize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mtry_frac</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.3333333333333333</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_leaf_frac_of_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VI</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ERT</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quantile_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">S_priority_vec</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">random_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trend_push</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">howmany_random_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">howmany_keep_best_VI</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">20</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cheap_look_at_GTVPs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_var</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subsampling_rate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rw_regul</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.75</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keep_forest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">12</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fast_rw</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ridge_lambda</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HRW</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">B</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">50</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">resampling_opt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">print_b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">parallelise</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_cores</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-</span> <span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MRF.MacroRandomForest" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>The main class to run MRF and generate predictions and generalized time-varying parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> (<em>-</em>) – Dataframe, including all potential columns (y, X, S) and rows (both training and testing data)</p></li>
+<li><p><strong>x_pos</strong> (<em>-</em>) – Column positions of variables selected to be time-varying. Should be a subset of exogenous variables</p></li>
+<li><p><strong>y_pos</strong> (<em>-</em>) – Column position of the prediction target</p></li>
+<li><p><strong>S_pos</strong> (<em>-</em>) – Column positions of variables entering the forest part (S_t in the paper)</p></li>
+<li><p><strong>oos_pos</strong> (<em>-</em>) – Row positions of test set/out-of-sample observations</p></li>
+<li><p><strong>minsize</strong> (<em>-</em>) – Minimal node size to attempt a split</p></li>
+<li><p><strong>mtry_frac</strong> (<em>-</em>) – Fraction of all features S_t to consider at each split. A lower value (like 0.15) helps speeding things up and can be reasonable when S_t contains many correlated features</p></li>
+<li><p><strong>min_leaf_frac_of_x</strong> (<em>-</em>) – Minimal ratio of observations to regressors in a node. Given the ridge penalty and random-walk shrinkage, there is no problem in letting this be one. Suggested values are (1,1.5,2) but those usually have very little influence</p></li>
+<li><p><strong>VI</strong> (<em>-</em>) – Variable importance. Currently not supported</p></li>
+<li><p><strong>ERT</strong> (<em>-</em>) – ERT stands for “Extremely Randomized Tree”. Activating this means splitting points (but not splitting variables) are chosen randomly. This brings extra regularization, and most importantly, speed. Option quantile rate determines how many random splits are considered. 1 means all of them, like usual RF. 0 is like pure ERT. All values in between are possible. This option is not used in the paper but can help exploratory work by speeding things up. Also, it could potentially help in forecasting via extra regularization</p></li>
+<li><p><strong>quantile_rate</strong> (<em>-</em>) – This option has a different meaning if ERT is activated. See above. Otherwise, this feature, for early splits, reduce the number of splitting point being considered for each S. 1 means all splitting points are considered. A value between 0 and 1 means we are considering a subset of quantiles of the splitting variable. For instance, quantile.rate=0.3 means one out of every tree (ordered) values is considered for splitting. The aim of this option is to speed things up without sacrificing much predictive ability</p></li>
+<li><p><strong>S_priority_vec</strong> (<em>-</em>) – RF randomly selects potential splitting variables at each step. However, in a large macro data sets, some types of variables could be over-represented, and some, underrepresented. The user can specify weights for all members of S using this option. Thus, one can down weight overrepresented group of regressors, if that makes sense to do so</p></li>
+<li><p><strong>trend_push</strong> (<em>-</em>) – See above. Must be &gt;=1. This option multiplies by “trend_push” the probability of the trend being included in the potential splitters set. 4 is a reasonable value with macro data. Note this can be used for anything (not necessarily a trend) that we may want to boost (in position trend_pos)</p></li>
+<li><p><strong>random_x</strong> (<em>-</em>) – Activating this lets the algorithm randomly select “howmany_random_x” regressor out of all those in “x_pos” for each tree. This is merely a predictive device, so GTVPs are not outputted in that case, and neither are VI measures</p></li>
+<li><p><strong>howmany_random_x</strong> (<em>-</em>) – See above. Must be between 1 and the length of “x_pos”</p></li>
+<li><p><strong>howmany_keep_best_VI</strong> (<em>-</em>) – How many variables should we keep by VI criteria. Currently not supported</p></li>
+<li><p><strong>prior_mean</strong> (<em>-</em>) – MRF implements a ridge prior. The user can specify a prior.mean vector of length “x_pos”+1 which differs from [0,0,0,0]. For instance, this may help when a close-to unit root is suspected. An easy (and good) data-driven prior mean vector consists of OLS estimates of regressing X’s on Y</p></li>
+<li><p><strong>prior_var</strong> (<em>-</em>) – When using prior_mean, a prior variance vector must also be specified. Remember this alters the implicit value of “ridge_lambda”. Also, the intercept should always have a larger variance</p></li>
+<li><p><strong>subsampling_rate</strong> (<em>-</em>) – Subsampling rate for the ensemble. Controls the percentage of observations used to make each tree estimate</p></li>
+<li><p><strong>rw_regul</strong> (<em>-</em>) – Egalitarian Olympic podium random-walk shrinkage parameter (see paper). Should be between 0 (nothing) and 1</p></li>
+<li><p><strong>keep_forest</strong> (<em>-</em>) – Not currently supported. Saves all the tree structures. Switch to True if you plan to forecast using the external function “pred_given_mrf”</p></li>
+<li><p><strong>block_size</strong> (<em>-</em>) – Size of blocks for block sub-sampling (resampling_opt=2) and block bayesian bootstrap (resampling_opt=4)</p></li>
+<li><p><strong>fast_rw</strong> (<em>-</em>) – When True, “rw_regul”” is only considered in the prediction step (and not in the search for splits). This speeds things up dramatically with often little influence on results</p></li>
+<li><p><strong>ridge_lambda</strong> (<em>-</em>) – Ridge shrinkage parameter for the linear part</p></li>
+<li><p><strong>HRW</strong> (<em>-</em>) – Seldomly use. See paper’s appendix. Can be useful for very large “x_pos”</p></li>
+<li><p><strong>B</strong> (<em>-</em>) – The number of trees to include for the ensemble</p></li>
+<li><p><strong>resampling_opt</strong> (<em>-</em>) – 0 is no resampling. 1 is plain subsampling. 2 is block subsampling (recommended when looking at GTVPs). 3 is Bayesian Bootstrap. 4 is Block Bayesian Bootstrap (may do better for forecasting)</p></li>
+<li><p><strong>print_b</strong> (<em>-</em>) – If True, print at which tree we are at in terms of computations. Not supported if parallelise = True</p></li>
+<li><p><strong>parallelise</strong> (<em>-</em>) – If True, computation will run across multiple cores. Speeds up computation in (almost) precise proportion to “n_cores”</p></li>
+<li><p><strong>n_cores</strong> (<em>-</em>) – Default value of -1 specifies that all available cores will be used. Use a different integer to specify fewer than all but &gt; 1 cores</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>dict (dict)</p></li>
+<li><p>YandX (pd.DataFrame): DataFrame containing original data</p></li>
+<li><p>pred_ensemble (pd.Series): Series containing predictions of ensembled trees</p></li>
+<li><p>pred (stacked numpy.matrix): Matrix containing raw (non-ensembled) predictions</p></li>
+<li><p>S_names (numpy.array): Column indices corresponding to state (exogenous) variables</p></li>
+<li><p>betas (numpy.matrix): Matrix containing average of betas across trees.</p></li>
+<li><p>beta_draws_raw (stacked numpy.matrix): Stacked matrix containing raw betas from individual trees.</p></li>
+<li><p>model (dict): Dictionary containing model information. Keys are [“forest”, “data”, “regul_lambda”, “HRW”, “no_rw_trespassing”, “B”, “random_vecs”, “y_pos”, “S_pos”, “x_pos”]</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="MRF.MacroRandomForest.financial_evaluation">
+<span class="sig-name descname"><span class="pre">financial_evaluation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">close_prices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#MRF.MacroRandomForest.financial_evaluation" title="Permalink to this definition"></a></dt>
+<dd><p>Method for automatically generating signals and backtesting the financial performance of MRF.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>close_prices</strong> (<em>-</em>) – Close prices of the financial asset corresponding to the target variable of interst.</p></li>
+<li><p><strong>k</strong> (<em>-</em>) – Forecast horizon.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Series corresponding to daily profit values of MRF-guided trading strategy over OOS period
+- cumulative_profit (pd.Series): Series corresponding to cumulative profit values of MRF-guided trading strategy over OOS period
+- annualised_return (float): Yearly profit earned over OOS period
+- sharpe_ratio (float): Sharpe Ratio metric corresponding to OOS period
+- max_drawdown (float): Maximum Drawdown metric corresponding to OOS period</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p>daily_profit (pd.Series)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="MRF.MacroRandomForest.statistical_evaluation">
+<span class="sig-name descname"><span class="pre">statistical_evaluation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#MRF.MacroRandomForest.statistical_evaluation" title="Permalink to this definition"></a></dt>
+<dd><p>Method for automatically generating statistical evaluation metrics for MRF predictions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Mean Absolute Error over OOS period
+- MSE (float): Mean Squared Error over OOS period</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>MAE (float)</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="Docs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Evaluation.html" class="btn btn-neutral float-right" title="Evaluation module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Philippe Goulet Coulombe and Ryan Lucas.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

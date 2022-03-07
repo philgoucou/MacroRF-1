@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 85 21" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(0.788557,0,0,0.733846,-1.49121,3.98847)">
+        <path d="M52.379,-1.626C52.379,-3.352 51.075,-4.754 49.468,-4.754L6.911,-4.754C5.304,-4.754 4,-3.352 4,-1.626L4,19.372C4,21.099 5.304,22.5 6.911,22.5L49.468,22.5C51.075,22.5 52.379,21.099 52.379,19.372L52.379,-1.626Z" style="fill:rgb(85,85,85);"/>
+    </g>
+    <g transform="matrix(0.758842,0,0,1.03898,-0.405916,-2.87714)">
+        <rect x="8.635" y="3.25" width="44.365" height="19.25" style="fill:rgb(85,85,85);"/>
+    </g>
+    <g transform="matrix(1.97778,0,0,1,-66.9743,-2)">
+        <path d="M76,4.247C76,3.283 75.604,2.5 75.117,2.5L55.893,2.5C55.405,2.5 55.009,3.283 55.009,4.247L55.009,20.753C55.009,21.717 55.405,22.5 55.893,22.5L75.117,22.5C75.604,22.5 76,21.717 76,20.753L76,4.247Z" style="fill:rgb(69,128,77);"/>
+    </g>
+    <g transform="matrix(1,0,0,1.04714,-13.1873,-3.06069)">
+        <rect x="53" y="3.4" width="8.335" height="19.1" style="fill:rgb(69,128,77);"/>
+    </g>
+    <g transform="matrix(0.1,0,0,0.1,20.2706,14.8988)">
+        <text x="-116.204px" y="0px" style="font-family:'Verdana', sans-serif;font-size:110px;fill:rgb(1,1,1);fill-opacity:0.3;">MRF</text>
+    </g>
+    <g transform="matrix(0.1,0,0,0.1,20.2706,14.0988)">
+        <text x="-116.204px" y="0px" style="font-family:'Verdana', sans-serif;font-size:110px;fill:white;">MRF</text>
+    </g>
+    <g transform="matrix(0.1,0,0,0.1,61.8871,14.8961)">
+        <text x="-177.461px" y="0px" style="font-family:'Verdana', sans-serif;font-size:110px;fill:rgb(1,1,1);fill-opacity:0.3;">v1.0.0</text>
+    </g>
+    <g transform="matrix(0.1,0,0,0.1,61.8871,14.0961)">
+        <text x="-177.461px" y="0px" style="font-family:'Verdana', sans-serif;font-size:110px;fill:white;">v1.0.0</text>
+    </g>
+</svg>

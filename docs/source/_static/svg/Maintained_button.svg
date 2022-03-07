@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 105 21" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1.51499,0,0,0.733846,-4.41275,3.98847)">
+        <path d="M52.379,-1.626C52.379,-3.352 51.7,-4.754 50.864,-4.754L5.515,-4.754C4.679,-4.754 4,-3.352 4,-1.626L4,19.372C4,21.099 4.679,22.5 5.515,22.5L50.864,22.5C51.7,22.5 52.379,21.099 52.379,19.372L52.379,-1.626Z" style="fill:rgb(85,85,85);"/>
+    </g>
+    <g transform="matrix(0.758842,0,0,1.03898,34.7227,-2.87714)">
+        <rect x="8.635" y="3.25" width="44.365" height="19.25" style="fill:rgb(85,85,85);"/>
+    </g>
+    <g transform="matrix(1.2578,0,0,1,7.7598,-2)">
+        <path d="M76,4.247C76,3.283 75.378,2.5 74.611,2.5L56.398,2.5C55.632,2.5 55.009,3.283 55.009,4.247L55.009,20.753C55.009,21.717 55.632,22.5 56.398,22.5L74.611,22.5C75.378,22.5 76,21.717 76,20.753L76,4.247Z" style="fill:rgb(69,128,77);"/>
+    </g>
+    <g transform="matrix(1,0,0,1.04714,21.9413,-3.06069)">
+        <rect x="53" y="3.4" width="8.335" height="19.1" style="fill:rgb(69,128,77);"/>
+    </g>
+    <g transform="matrix(0.1,0,0,0.1,38.5605,15.3955)">
+        <text x="-330.913px" y="0px" style="font-family:'Verdana', sans-serif;font-size:110px;fill:rgb(1,1,1);fill-opacity:0.3;">Maintained?</text>
+    </g>
+    <g transform="matrix(0.1,0,0,0.1,38.5605,14.5955)">
+        <text x="-330.913px" y="0px" style="font-family:'Verdana', sans-serif;font-size:110px;fill:white;">Maintained?</text>
+    </g>
+    <g transform="matrix(0.1,0,0,0.1,89.5121,14.0041)">
+        <text x="-93.484px" y="0px" style="font-family:'Verdana', sans-serif;font-size:110px;fill:rgb(1,1,1);fill-opacity:0.3;">y<tspan x="-29.353px 36.174px " y="0px 0px ">es</tspan></text>
+    </g>
+    <g transform="matrix(0.1,0,0,0.1,88.8427,13.2041)">
+        <text x="-93.484px" y="0px" style="font-family:'Verdana', sans-serif;font-size:110px;fill:white;">y<tspan x="-29.353px 36.174px " y="0px 0px ">es</tspan></text>
+    </g>
+</svg>
