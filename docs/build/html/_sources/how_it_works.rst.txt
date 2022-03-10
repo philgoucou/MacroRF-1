@@ -9,7 +9,7 @@ Overview
 
 Within the modern ML canon, random forest is an extremely popular algorithm because it allows for complex nonlinearities, handled high-dimensional data, bypasses overfitting, and requires little to no tuning. However, while random forest gladly delivers gains in prediction accuracy (and ergo a conditional mean closer to the truth), it is much more reluctant to disclose its inherent model. 
 
-MRF shifts the focus away from predicting :math:`y_t` into modelling :math:`\beta_t`, which are the economically meaningful coefficients in a time-varying linear macro equation. The beauty is that, bringing together the linear macro equation with the random forest ML algorithm means that our linear coefficient then nests the decisions of the forest. More formally:
+MRF shifts the focus of the forest away from predicting :math:`y_t` into modelling :math:`\beta_t`, which are the economically meaningful coefficients in a time-varying linear macro equation. More formally:
 
 .. math::
 
@@ -28,7 +28,7 @@ MRF shifts the focus away from predicting :math:`y_t` into modelling :math:`\bet
 
 Where :math:`S_t` are the state variables governing time variation and :math:`\mathcal{F}` is a forest. :math:`X_t` is typically a subset of :math:`S_t` which we want to be time-varying. This setup provides strong generality. For instance, :math:`X_t` could use lags of :math:`y_t` - what is called an autoregressive random forest (ARRF). Typically :math:`X_t \subset S_t` is rather small (and focused) compared to :math:`S_t`.
 
-For those unfamiliar with random forests, what happens next is that we bootstrap the data to create a random sub-sample of observations. This is a set of time indices :math:`l` that becomes the parent node for our tree-splitting procedure. After randomising over rows, we then take a random subset of the predictors, call it :math:`\mathcal{J}^-`. Analogously to Friedberg et al. (2018) [1]_, MRF then performs a search for the optimal predictor and optimal splitting point. For each tree, we  implement least squares optimisation with a ridge penalty over :math:`j \in \mathcal{J}^{-}` and :math:`c \in \mathbb{R}`, where c is the splitting point. Mathematically, this becomes:
+For those unfamiliar with random forests, what happens next is that we bootstrap the data to create a random sub-sample of observations. This is a set of time indices :math:`l` that becomes the parent node for our tree-splitting procedure. After randomising over rows, we then take a random subset of the predictors, call it :math:`\mathcal{J}^-`. MRF then performs a search for the optimal predictor and optimal splitting point. For each tree, we  implement least squares optimisation with a ridge penalty over :math:`j \in \mathcal{J}^{-}` and :math:`c \in \mathbb{R}`, where c is the splitting point. Mathematically, this becomes:
 
 .. math::
 
@@ -53,7 +53,7 @@ Equation :math:`\ref{a}` uses Ridge shrinkage which implies that each time-varyi
    \begin{equation*}
    \begin{aligned}
    \begin{aligned}
-   \beta_t = \beta_{t-1} + \mu_t
+   \beta_t = \beta_{t-1} + u_t
    \end{aligned}
    \end{aligned} 
    \end{equation*} 
@@ -111,9 +111,3 @@ The splitting rule then becomes:
    \end{aligned}
    \end{aligned} \label{b} \tag{2}
    \end{equation*} 
-
-References
-----------
-
-.. [1] Friedberg, R., Tibshirani, J., Athey, S., and Wager, S. (2018). Local linear forests. arXiv preprint arXiv:1807.11408.
-

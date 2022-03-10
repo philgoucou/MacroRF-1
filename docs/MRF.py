@@ -9,7 +9,7 @@ from helper import *
 class MacroRandomForest:
 
     '''
-
+    
     The main class to run MRF and generate predictions and generalized time-varying parameters.
 
     Args:

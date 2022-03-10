@@ -37,13 +37,7 @@ Installation
 Python
 ------
 
-The recommended Python installation is via pip:
-
-.. code-block:: python
-
-   pip install MacroRandomForest
-
-To install the package manually, you can do:
+To install the package in Python, you can simply do:
 
 .. code-block:: python
 

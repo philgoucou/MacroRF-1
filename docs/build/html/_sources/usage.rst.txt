@@ -86,5 +86,52 @@ And, last but not least, the GTVPs:
 
 .. image:: /images/GTVPs.png
 
+Implementation Example: Financial Trading
+----------------------------
+
+To start with, let's read in one of our finance datasets:
+
+.. code-block:: python
+
+   data_in = pd.read_csv("../Datasets/finance.csv")
+
+We want to have a long backtest period in order to evaluate MRF, so we are going to set up our out-of-sample period to include the last 800 observations:
+
+.. code-block:: python
+
+   oos_pos = np.arange(data_in.index[-800], data_in.index[-1]+1)
+
+Now for the MRF specification:
+
+.. code-block:: python
+
+   MRF = MacroRandomForest(data = data_in,
+                           y_pos = 0,
+                           x_pos = np.arange(1, 5), 
+                           fast_rw = True, 
+                           B = 30, 
+                           mtry_frac = 0.3, 
+                           resampling_opt = 2,
+                           oos_pos = oos_pos, 
+                           trend_push = 1,
+                           quantile_rate = 0.3, 
+                           parallelise = True)
+
+And the MRF fitting:
+
+.. code-block:: python
+
+   mrf_output = MRF._ensemble_loop()
+
+Now we can automatically evaluate the financial performance of MRF using the financial_evaluation() function:
+
+.. code-block:: python
+
+   MRF.financial_evaluation(close_prices)
+
+And voila, you have a fully trained and backtested model. You are ready to deploy your MRF-guided trading strategy.
+
+.. image:: /images/MRF_finance.png
+
 
 

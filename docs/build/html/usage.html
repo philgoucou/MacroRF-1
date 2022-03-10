@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Usage &mdash; Macro Random Forest 1.0 documentation</title>
@@ -44,6 +44,7 @@
 <li class="toctree-l1"><a class="reference internal" href="modules.html">Docs</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#implementation-example">Implementation Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#implementation-example-financial-trading">Implementation Example: Financial Trading</a></li>
 </ul>
 </li>
 </ul>
@@ -134,6 +135,41 @@
 <img alt="_images/OOS.png" src="_images/OOS.png" />
 <p>And, last but not least, the GTVPs:</p>
 <img alt="_images/GTVPs.png" src="_images/GTVPs.png" />
+</section>
+<section id="implementation-example-financial-trading">
+<h2>Implementation Example: Financial Trading<a class="headerlink" href="#implementation-example-financial-trading" title="Permalink to this headline"></a></h2>
+<p>To start with, let’s read in one of our finance datasets:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_in</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;../Datasets/finance.csv&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We want to have a long backtest period in order to evaluate MRF, so we are going to set up our out-of-sample period to include the last 800 observations:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">oos_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">data_in</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">800</span><span class="p">],</span> <span class="n">data_in</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now for the MRF specification:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">MRF</span> <span class="o">=</span> <span class="n">MacroRandomForest</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">data_in</span><span class="p">,</span>
+                        <span class="n">y_pos</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                        <span class="n">x_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">),</span>
+                        <span class="n">fast_rw</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                        <span class="n">B</span> <span class="o">=</span> <span class="mi">30</span><span class="p">,</span>
+                        <span class="n">mtry_frac</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
+                        <span class="n">resampling_opt</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+                        <span class="n">oos_pos</span> <span class="o">=</span> <span class="n">oos_pos</span><span class="p">,</span>
+                        <span class="n">trend_push</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+                        <span class="n">quantile_rate</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
+                        <span class="n">parallelise</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And the MRF fitting:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mrf_output</span> <span class="o">=</span> <span class="n">MRF</span><span class="o">.</span><span class="n">_ensemble_loop</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Now we can automatically evaluate the financial performance of MRF using the financial_evaluation() function:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">MRF</span><span class="o">.</span><span class="n">financial_evaluation</span><span class="p">(</span><span class="n">close_prices</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And voila, you have a fully trained and backtested model. You are ready to deploy your MRF-guided trading strategy.</p>
+<img alt="_images/MRF_finance.png" src="_images/MRF_finance.png" />
 </section>
 </section>
 
