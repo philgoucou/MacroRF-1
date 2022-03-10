@@ -8,7 +8,7 @@ The following gives an instructive example on how to run MRF to generate forecas
 
 It is recommended that you see :ref:`Docs <docs>`, particularly the MRF module, before you proceed. You can proceed with the below as an example of how to get started. 
 
-Implementation Example
+Implementation Example: Macroeconomic Forecasting
 ----------------------
 
 Let's say our goal is to predict GDP (or change in GDP) using various macroeconomic indicators. 
@@ -131,7 +131,7 @@ Now we can automatically evaluate the financial performance of MRF using the fin
 
 And voila, you have a fully trained and backtested model. You are ready to deploy your MRF-guided trading strategy.
 
-The following shows the financial trading performance of MRF (green), implementing the trading strategy described in :ref:`Evaluation <fineval>`, compared to 100 "monkey traders".
+The following shows the financial trading performance of MRF (green), implementing the trading strategy described in :ref:`Evaluation <fineval>`. We provide 100 "monkey traders" that implement the same strategy (grey) as a comparison.
 
 .. image:: /images/MRF_finance.png
 

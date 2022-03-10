@@ -43,7 +43,7 @@
 <li class="toctree-l1"><a class="reference internal" href="how_it_works.html">How it works</a></li>
 <li class="toctree-l1"><a class="reference internal" href="modules.html">Docs</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#implementation-example">Implementation Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#implementation-example-macroeconomic-forecasting">Implementation Example: Macroeconomic Forecasting</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#implementation-example-financial-trading">Implementation Example: Financial Trading</a></li>
 </ul>
 </li>
@@ -77,8 +77,8 @@
 <span id="id1"></span><h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h1>
 <p>The following gives an instructive example on how to run MRF to generate forecasts and generalized time-varying parameters (GTVPs).</p>
 <p>It is recommended that you see <a class="reference internal" href="modules.html#docs"><span class="std std-ref">Docs</span></a>, particularly the MRF module, before you proceed. You can proceed with the below as an example of how to get started.</p>
-<section id="implementation-example">
-<h2>Implementation Example<a class="headerlink" href="#implementation-example" title="Permalink to this headline"></a></h2>
+<section id="implementation-example-macroeconomic-forecasting">
+<h2>Implementation Example: Macroeconomic Forecasting<a class="headerlink" href="#implementation-example-macroeconomic-forecasting" title="Permalink to this headline"></a></h2>
 <p>Let’s say our goal is to predict GDP (or change in GDP) using various macroeconomic indicators.</p>
 <p>Additionally, say for example we want the variables L1_GDP, UNEMP and CPI to be time-varying.</p>
 <p>To start, let’s read in our data.</p>
@@ -169,7 +169,7 @@
 </pre></div>
 </div>
 <p>And voila, you have a fully trained and backtested model. You are ready to deploy your MRF-guided trading strategy.</p>
-<p>The following shows the financial trading performance of MRF (green), implementing the trading strategy described in <a class="reference internal" href="Evaluation.html#fineval"><span class="std std-ref">Evaluation</span></a>, compared to 100 “monkey traders”.</p>
+<p>The following shows the financial trading performance of MRF (green), implementing the trading strategy described in <a class="reference internal" href="Evaluation.html#fineval"><span class="std std-ref">Evaluation</span></a>. We provide 100 “monkey traders” that implement the same strategy (grey) as a comparison.</p>
 <img alt="_images/MRF_finance.png" src="_images/MRF_finance.png" />
 </section>
 </section>
