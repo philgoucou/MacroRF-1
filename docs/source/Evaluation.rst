@@ -16,6 +16,7 @@ As statistical evaluation metrics, we use the standard MAE and MSE:
 
 Where :math:`k` is the forecast horizon and :math:`\vert T\vert` is the cardinality of the index set :math:`T`. In our case this index set is the specified out-of-sample observations. 
 
+.. _fineval:
 Financial Evaluation Metrics
 --------------------------------
 

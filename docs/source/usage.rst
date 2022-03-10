@@ -131,6 +131,8 @@ Now we can automatically evaluate the financial performance of MRF using the fin
 
 And voila, you have a fully trained and backtested model. You are ready to deploy your MRF-guided trading strategy.
 
+The following shows the financial trading performance of MRF (green), implementing the trading strategy described in :ref:`Evaluation <fineval>`, compared to 100 "monkey traders".
+
 .. image:: /images/MRF_finance.png
 
 
