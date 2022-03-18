@@ -9,9 +9,9 @@ Macroeconomic Random Forest
 
    <embed>
         <p align="center">
-            <a href="https://www.python.org/">
+            <a href="https://www.r-project.org/">
                 <img src="./_static/svg/R_button.svg"
-                    width="77" height="12" alt="python"></a> &nbsp;
+                    width="77" height="12" alt="R"></a> &nbsp;
             <a href="https://www.python.org/">
                 <img src="./_static/svg/Python_button.svg"
                     width="100" height="30" alt="python"></a> &nbsp;
