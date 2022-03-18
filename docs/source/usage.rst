@@ -95,11 +95,23 @@ To start with, let's read in one of our finance datasets:
 
    data_in = pd.read_csv("../Datasets/finance.csv")
 
-We want to have a long backtest period in order to evaluate MRF, so we are going to set up our out-of-sample period to include the last 800 observations:
+We can take a look at this data using :code:`display(data_in.head(5))`::
+
+
+      Date     spy_close  spy_1d_returns   VIX_slope    yc_3m   yc_10y   yc_slopes_3m_10y   5Ewm     15Ewm      MACD    trend
+   24/01/2013   1494.82      -0.002          -0.001     0.00     0.02        0.001         2.654     2.340    -11.071     1 
+   25/01/2013   1502.96       0.005          -0.001     0.00     0.10        0.001         4.483     3.065    -12.489     2 
+   28/01/2013   1500.18      -0.007          -0.002    -0.01     0.02        0.001         2.062     2.334    -12.216     3 
+   29/01/2013   1507.84       0.007           0.002     0.00     0.03        0.001         3.928     3.000    -13.144     4 
+   30/01/2013.  1501.96      -0.009          -0.003     0.00     0.00        0.001         0.659     1.890    -11.913     5 
+   
+   
+
+We want to have a backtest (oos) period in order to evaluate MRF, so we are going to set up our out-of-sample period to include the last 350 observations:
 
 .. code-block:: python
 
-   oos_pos = np.arange(data_in.index[-800], data_in.index[-1]+1)
+   oos_pos = np.arange(data_in.index[-350], data_in.index[-1]+1)
 
 Now for the MRF specification:
 
@@ -109,11 +121,11 @@ Now for the MRF specification:
                            y_pos = 0,
                            x_pos = np.arange(1, 5), 
                            fast_rw = True, 
-                           B = 30, 
+                           B = 50, 
                            mtry_frac = 0.3, 
                            resampling_opt = 2,
                            oos_pos = oos_pos, 
-                           trend_push = 1,
+                           trend_push = 2,
                            quantile_rate = 0.3, 
                            parallelise = True)
 
@@ -133,7 +145,7 @@ And voila, you have a fully trained and backtested model. You are ready to deplo
 
 The following shows the financial trading performance of MRF (green), implementing the trading strategy described in :ref:`Evaluation <fineval>`. We provide 100 "monkey traders" that implement the same strategy (grey) as a comparison.
 
-.. image:: /images/MRF_finance.png
+.. image:: /images/Trading.png
 
 
 
