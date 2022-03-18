@@ -4,7 +4,7 @@ How it works
 
 This is a simple explanation of MRF, how it works and why it's useful. The algorithm is described in more detail in https://arxiv.org/abs/2006.12724.
 
-Overview
+Setup
 --------
 
 Within the modern ML canon, random forest is an extremely popular algorithm because it allows for complex nonlinearities, handled high-dimensional data, bypasses overfitting, and requires little to no tuning. However, while random forest gladly delivers gains in prediction accuracy (and ergo a conditional mean closer to the truth), it is much more reluctant to disclose its inherent model. 
@@ -26,9 +26,16 @@ MRF shifts the focus of the forest away from predicting :math:`y_t` into modelli
    \end{equation}
 
 
-Where :math:`S_t` are the state variables governing time variation and :math:`\mathcal{F}` is a forest. :math:`X_t` is typically a subset of :math:`S_t` which we want to be time-varying. This setup provides strong generality. For instance, :math:`X_t` could use lags of :math:`y_t` - what is called an autoregressive random forest (ARRF). Typically :math:`X_t \subset S_t` is rather small (and focused) compared to :math:`S_t`.
+Where :math:`S_t` are the state variables governing time variation and :math:`\mathcal{F}` is a forest. :math:`X_t` is typically a subset of :math:`S_t` which we want to be time-varying. This setup provides strong generality. For instance, :math:`X_t` could use lags of :math:`y_t` - what is called an autoregressive random forest (ARRF). Typically :math:`X_t \subset S_t` is rather small (and focused) compared to :math:`S_t`. 
 
-For those unfamiliar with random forests, what happens next is that we bootstrap the data to create a random sub-sample of observations. This is a set of time indices :math:`l` that becomes the parent node for our tree-splitting procedure. After randomising over rows, we then take a random subset of the predictors, call it :math:`\mathcal{J}^-`. MRF then performs a search for the optimal predictor and optimal splitting point. For each tree, we  implement least squares optimisation with a ridge penalty over :math:`j \in \mathcal{J}^{-}` and :math:`c \in \mathbb{R}`, where c is the splitting point. Mathematically, this becomes:
+The beauty of the setup resides in combining the linear macro equation with the random forest ML algorithm. This allows our linear coefficient, which we can interpret and make inference about, to nest the important time-series nonlinearities captured by the forest.
+
+Random Forest
+--------
+
+For those unfamiliar with random forests, the general fitting procedure involves firstly bootstrapping the data to create a random sub-sample of observations. In time series, this will be a set of time indices :math:`l` that becomes the parent node for our tree-splitting procedure. 
+
+After randomising over rows, we then take a random subset of the predictors, call it :math:`\mathcal{J}^-`. MRF then performs a search for the optimal predictor and optimal splitting point. For each tree, we  implement least squares optimisation with a ridge penalty over :math:`j \in \mathcal{J}^{-}` and :math:`c \in \mathbb{R}`, where c is the splitting point. Mathematically, this becomes:
 
 .. math::
 
@@ -42,6 +49,14 @@ For those unfamiliar with random forests, what happens next is that we bootstrap
     \end{equation*} 
 
 Practically, optimisation over :math:`c` happens by sampling empirical quantiles of the predictor to be split. These become the possible options for the splits and we evaluate least squares repeatedly to find the optimal splitting point for a given predictor :math:`j`. In an outer loop, we take the minimum to find :math:`j^* \in \mathcal{J}^{-}` and :math:`c^* \in \mathbb{R}`.
+
+This process is, in principle, a greedy search algorithm. A greedy algorithm makes "locally" optimal decisions, rather than finding the globally optimal solution.
+
+.. image:: /images/Greedy_v_true.svg
+
+However, various properties of random forests reduce the extent to which this is a problem in practice. First, each tree is grown on a bootstrapped sample, meaning that we are selecting many observation triplets :math:`[y_t, X_t, S_t]` for each tree that is fit. The trees are then diversified by being fit on many different random subsamples. This means that they travel down a wider array of optimization routes, thus safeguarding against landing at a single greedy solution.
+
+This problem is further alleviated in our context by growing trees semi-stochastically. In Equation :math:`\ref{a}`, this is made operational by using :math:`\mathcal{J}^{-} \in \mathcal{J}` rather than :math:`\mathcal{J}`. In words, this means that at each step of the recursion, a different subsample of regressors is drawn to constitute candidates for the split. This prevents the greedy algorithm from always embarking on the same optimization route. As a result, trees are further diversified and computing time reduced.
 
 Random Walk Regularisation
 --------------------------

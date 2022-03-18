@@ -103,7 +103,7 @@ We can take a look at this data using :code:`display(data_in.head(5))`::
    25/01/2013   1502.96       0.005          -0.001     0.00     0.10        0.001         4.483     3.065    -12.489     2 
    28/01/2013   1500.18      -0.007          -0.002    -0.01     0.02        0.001         2.062     2.334    -12.216     3 
    29/01/2013   1507.84       0.007           0.002     0.00     0.03        0.001         3.928     3.000    -13.144     4 
-   30/01/2013.  1501.96      -0.009          -0.003     0.00     0.00        0.001         0.659     1.890    -11.913     5 
+   30/01/2013   1501.96      -0.009          -0.003     0.00     0.00        0.001         0.659     1.890    -11.913     5 
    
    
 
@@ -143,7 +143,7 @@ Now we can automatically evaluate the financial performance of MRF using the fin
 
 And voila, you have a fully trained and backtested model. You are ready to deploy your MRF-guided trading strategy.
 
-The following shows the financial trading performance of MRF (green), implementing the trading strategy described in :ref:`Evaluation <fineval>`. We provide 100 "monkey traders" that implement the same strategy (grey) as a comparison.
+The following shows the financial trading performance of MRF (green), implementing the trading strategy described in :ref:`Evaluation <fineval>`. We provide 100 "monkey traders" that implement the same strategy (grey) and a buy-and-hold strategy on the S&P 500 as a comparison.
 
 .. image:: /images/Trading.png
 
