@@ -151,6 +151,11 @@
 <span class="mi">30</span><span class="o">/</span><span class="mi">01</span><span class="o">/</span><span class="mi">2013</span>   <span class="mf">1501.96</span>      <span class="o">-</span><span class="mf">0.009</span>          <span class="o">-</span><span class="mf">0.003</span>     <span class="mf">0.00</span>     <span class="mf">0.00</span>        <span class="mf">0.001</span>         <span class="mf">0.659</span>     <span class="mf">1.890</span>    <span class="o">-</span><span class="mf">11.913</span>     <span class="mi">5</span>
 </pre></div>
 </div>
+<p>Since we are not going to predict the price, but rather the return, we need to assign our prices to a new variable (we will use it later) and remove it from our dataframe containing <span class="math notranslate nohighlight">\([y_t, X_t, S_t]\)</span>:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">close_prices</span> <span class="o">=</span> <span class="n">data_in</span><span class="p">[</span><span class="s1">&#39;spy_close&#39;</span><span class="p">]</span>
+<span class="n">data_in</span> <span class="o">=</span> <span class="n">data_in</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:]</span>
+</pre></div>
+</div>
 <p>We want to have a backtest (oos) period in order to evaluate MRF, so we are going to set up our out-of-sample period to include the last 350 observations:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">oos_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">data_in</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">350</span><span class="p">],</span> <span class="n">data_in</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>

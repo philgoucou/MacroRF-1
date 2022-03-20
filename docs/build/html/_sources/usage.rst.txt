@@ -105,6 +105,12 @@ We can take a look at this data using :code:`display(data_in.head(5))`::
    29/01/2013   1507.84       0.007           0.002     0.00     0.03        0.001         3.928     3.000    -13.144     4 
    30/01/2013   1501.96      -0.009          -0.003     0.00     0.00        0.001         0.659     1.890    -11.913     5 
    
+Since we are not going to predict the price, but rather the return, we need to assign our prices to a new variable (we will use it later) and remove it from our dataframe containing :math:`[y_t, X_t, S_t]`:
+
+.. code-block:: python
+
+   close_prices = data_in['spy_close']
+   data_in = data_in.iloc[:, 1:]
    
 
 We want to have a backtest (oos) period in order to evaluate MRF, so we are going to set up our out-of-sample period to include the last 350 observations:
