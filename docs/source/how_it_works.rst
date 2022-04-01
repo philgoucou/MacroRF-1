@@ -56,7 +56,7 @@ This process is, in principle, a greedy search algorithm. A greedy algorithm mak
 
 However, various properties of random forests reduce the extent to which this is a problem in practice. First, each tree is grown on a bootstrapped sample, meaning that we are selecting many observation triplets :math:`[y_t, X_t, S_t]` for each tree that is fit. This means the trees are diversified by being fit on many different random subsamples. By travelling down a wide array of optimization routes, the forest safeguards against landing at a single greedy solution.
 
-This problem is further alleviated in our context by growing trees semi-stochastically. In Equation :math:`\ref{a}`, this is made operational by using :math:`\mathcal{J}^{-} \in \mathcal{J}` rather than :math:`\mathcal{J}`. In words, this means that at each step of the recursion, a different subsample of regressors is drawn to constitute candidates for the split. This prevents the greedy algorithm from always embarking on the same optimization route. As a result, trees are further diversified and computing time reduced.
+This problem is further alleviated in our context by growing trees semi-stochastically. In Equation :math:`\ref{a}`, this is made operational by using :math:`\mathcal{J}^{-} \in \mathcal{J}` rather than :math:`\mathcal{J}`. This means that at each step of the recursion, a different subsample of regressors is drawn to constitute candidates for the split. This prevents the greedy algorithm from always embarking on the same optimization route. As a result, trees are further diversified and computing time reduced.
 
 Random Walk Regularisation
 --------------------------
