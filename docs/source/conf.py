@@ -45,7 +45,10 @@ html_context = {
     "github_repo": "MacroRandomForest",  # Repo name
     "github_version": "master",  # Version
     "conf_py_path": "/source/",  # Path in the checkout to the docs root
+
 }
+
+html_show_sourcelink = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

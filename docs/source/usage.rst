@@ -167,18 +167,28 @@ And the MRF fitting:
 
    mrf_output = MRF._ensemble_loop()
 
-Now we can automatically evaluate the financial performance of MRF using the financial_evaluation() function:
+Now we can automatically evaluate the financial performance of MRF using the :code:`financial_evaluation()` function. This function will return 5 outputs: 1) The daily profit series associated with the induced strategy, 2) The cumulative profit series, 3) The annualised return, 4) The Sharpe ratio and 5) The maximum drawdown. These metrics are outlined in :ref:`Evaluation <fineval>`.
 
 .. code-block:: python
 
-   MRF.financial_evaluation(close_prices)
+   trading_statistics = MRF.financial_evaluation(model_forecasts = mrf_output['pred'], 
+                                                 close_prices = close_prices)
 
-And voila, you have a fully trained and backtested model. You are ready to deploy your MRF-guided trading strategy.
+   daily_profit = trading_statistics[0]
+   cumulative_profit = trading_statistics[1]
+   annualised_return = trading_statistics[2]
+   sharpe_ratio = trading_statistics[3]
+   maximum_drawdown = trading_statistics[4]
 
-The following shows the financial trading performance of MRF (green), implementing the trading strategy described in :ref:`Evaluation <fineval>`. We provide 100 "monkey traders" that implement the same strategy (grey) and a "buy and hold" strategy on the S&P 500 (blue) as a comparison.
+We can also get out a useful plot that compares the financial trading performance of MRF (green) versus 100 "monkey traders" that implement the same strategy (grey) and a "buy and hold" strategy on the S&P 500 (blue).
+
+.. code-block:: python
+
+   MRF.monkey_trader_plot(close_prices)
 
 .. image:: /images/Trading.png
 
+And voila, you have a fully trained and backtested model. You are ready to deploy your MRF-guided trading strategy.
 
 R 
 ----------------------------

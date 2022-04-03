@@ -73,7 +73,6 @@
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
       <li>Usage</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/usage.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -207,13 +206,23 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mrf_output</span> <span class="o">=</span> <span class="n">MRF</span><span class="o">.</span><span class="n">_ensemble_loop</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Now we can automatically evaluate the financial performance of MRF using the financial_evaluation() function:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">MRF</span><span class="o">.</span><span class="n">financial_evaluation</span><span class="p">(</span><span class="n">close_prices</span><span class="p">)</span>
+<p>Now we can automatically evaluate the financial performance of MRF using the <code class="code docutils literal notranslate"><span class="pre">financial_evaluation()</span></code> function. This function will return 5 outputs: 1) The daily profit series associated with the induced strategy, 2) The cumulative profit series, 3) The annualised return, 4) The Sharpe ratio and 5) The maximum drawdown. These metrics are outlined in <a class="reference internal" href="Evaluation.html#fineval"><span class="std std-ref">Evaluation</span></a>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">trading_statistics</span> <span class="o">=</span> <span class="n">MRF</span><span class="o">.</span><span class="n">financial_evaluation</span><span class="p">(</span><span class="n">model_forecasts</span> <span class="o">=</span> <span class="n">mrf_output</span><span class="p">[</span><span class="s1">&#39;pred&#39;</span><span class="p">],</span>
+                                              <span class="n">close_prices</span> <span class="o">=</span> <span class="n">close_prices</span><span class="p">)</span>
+
+<span class="n">daily_profit</span> <span class="o">=</span> <span class="n">trading_statistics</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">cumulative_profit</span> <span class="o">=</span> <span class="n">trading_statistics</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">annualised_return</span> <span class="o">=</span> <span class="n">trading_statistics</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">sharpe_ratio</span> <span class="o">=</span> <span class="n">trading_statistics</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+<span class="n">maximum_drawdown</span> <span class="o">=</span> <span class="n">trading_statistics</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>And voila, you have a fully trained and backtested model. You are ready to deploy your MRF-guided trading strategy.</p>
-<p>The following shows the financial trading performance of MRF (green), implementing the trading strategy described in <a class="reference internal" href="Evaluation.html#fineval"><span class="std std-ref">Evaluation</span></a>. We provide 100 “monkey traders” that implement the same strategy (grey) and a “buy and hold” strategy on the S&amp;P 500 (blue) as a comparison.</p>
+<p>We can also get out a useful plot that compares the financial trading performance of MRF (green) versus 100 “monkey traders” that implement the same strategy (grey) and a “buy and hold” strategy on the S&amp;P 500 (blue).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">MRF</span><span class="o">.</span><span class="n">monkey_trader_plot</span><span class="p">(</span><span class="n">close_prices</span><span class="p">)</span>
+</pre></div>
+</div>
 <img alt="_images/Trading.png" src="_images/Trading.png" />
+<p>And voila, you have a fully trained and backtested model. You are ready to deploy your MRF-guided trading strategy.</p>
 </section>
 </section>
 <section id="r">
