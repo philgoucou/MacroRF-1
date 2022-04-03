@@ -44,12 +44,13 @@
 <li class="toctree-l1"><a class="reference internal" href="modules.html">Docs</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#python">Python</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#implementation-example-simulated-example">Implementation Example: Simulated Example</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implementation-example-simple-one-step-forecasting">Implementation Example: Simple One-Step Forecasting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implementation-example-complex-multi-step-forecasting">Implementation Example: Complex Multi-Step Forecasting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#implementation-example-financial-trading">Implementation Example: Financial Trading</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#r">R</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#implementation-example-simulated-data">Implementation Example: Simulated Data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id2">Implementation Example: Simple One-Step Forecasting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#implementation-example-macroeconomic-forecasting">Implementation Example: Macroeconomic Forecasting</a></li>
 </ul>
 </li>
@@ -87,8 +88,8 @@
 <h2>Python<a class="headerlink" href="#python" title="Permalink to this headline"></a></h2>
 <p>The following provide instructive examples on how to run MRF to generate forecasts and generalized time-varying parameters (GTVPs).</p>
 <p>It is recommended that you see <a class="reference internal" href="modules.html#docs"><span class="std std-ref">Docs</span></a>, particularly the MRF module, before you proceed. You can proceed with the below as an example of how to get started.</p>
-<section id="implementation-example-simulated-example">
-<h3>Implementation Example: Simulated Example<a class="headerlink" href="#implementation-example-simulated-example" title="Permalink to this headline"></a></h3>
+<section id="implementation-example-simple-one-step-forecasting">
+<h3>Implementation Example: Simple One-Step Forecasting<a class="headerlink" href="#implementation-example-simple-one-step-forecasting" title="Permalink to this headline"></a></h3>
 <p>First order of business is to import MRF and matplotlib, a useful plotting package:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MRF</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -111,7 +112,7 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">oos_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">simulated_data</span><span class="p">)</span> <span class="o">-</span> <span class="mi">50</span> <span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">simulated_data</span><span class="p">))</span> <span class="c1"># lower should be oos start, upper the length of your dataset</span>
 </pre></div>
 </div>
-<p>Notice that our desired <span class="math notranslate nohighlight">\(y_t\)</span> is in column position 0, so we will pass <code class="code docutils literal notranslate"><span class="pre">y_pos</span> <span class="pre">=</span> <span class="pre">0</span></code>. Our desired <span class="math notranslate nohighlight">\(X_t\)</span> are in index positions 1, 2 and 3, since we want our first 3 predictors to be time-varying, so we will pass <code class="code docutils literal notranslate"><span class="pre">np.arange(1,</span> <span class="pre">4)</span></code> as x_pos. S_pos we will omit from our arguments, since we want all of our extra exogenous variables to be included in our overall predictor set.</p>
+<p>Notice that our desired <span class="math notranslate nohighlight">\(y_t\)</span> is in column position 0, so we will pass <code class="code docutils literal notranslate"><span class="pre">y_pos</span> <span class="pre">=</span> <span class="pre">0</span></code>. Our desired <span class="math notranslate nohighlight">\(X_t\)</span> are in index positions 1, 2 and 3, since we want our first 3 predictors to be time-varying, so we will pass <code class="code docutils literal notranslate"><span class="pre">x_pos</span> <span class="pre">=</span> <span class="pre">np.arange(1,</span> <span class="pre">4)</span></code>. S_pos we will omit from our arguments, since we want all of our extra exogenous variables to be included in our overall predictor set.</p>
 <p>If we want to speed things up, we can also select <code class="code docutils literal notranslate"><span class="pre">parallelise</span> <span class="pre">=</span> <span class="pre">True</span></code> and <code class="code docutils literal notranslate"><span class="pre">n_cores</span> <span class="pre">=</span> <span class="pre">3</span></code> to run the code across 3 cores on our machine.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -164,6 +165,51 @@
 </pre></div>
 </div>
 <img alt="_images/GTVPs.png" src="_images/GTVPs.png" />
+</section>
+<section id="implementation-example-complex-multi-step-forecasting">
+<h3>Implementation Example: Complex Multi-Step Forecasting<a class="headerlink" href="#implementation-example-complex-multi-step-forecasting" title="Permalink to this headline"></a></h3>
+<p>Let’s say that our goal is to forecast non-farm payrolls using principal components (factors) of the FRED macroeconomic data base (FREDMD).</p>
+<p>Let’s firstly load MRF, numpy and pandas.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MRF</span> <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p>We are also going to download the processed FRED data file, which has already handled appropriate PCA transformations for us:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">URL</span> <span class="o">=</span> <span class="s1">&#39;https://drive.google.com/file/d/1Alr-eHbMhKvKnlPaL6x3sP9CKe21Zxr6/view?usp=sharing&#39;</span>
+<span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;https://drive.google.com/uc?export=download&amp;id=&#39;</span><span class="o">+</span><span class="n">URL</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">index_col</span> <span class="o">=</span> <span class="s2">&quot;Unnamed: 0&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can take a look at this data using <code class="code docutils literal notranslate"><span class="pre">display(df.head(5))</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">index</span>    <span class="n">PAYEMS</span>       <span class="n">F_1</span>         <span class="n">F_2</span>        <span class="n">F_3</span>        <span class="n">F_4</span>        <span class="n">F_5</span>       <span class="n">MAF_1</span>       <span class="n">MAF_2</span>       <span class="n">MAF_3</span>
+<span class="mi">60</span>      <span class="mf">0.000781</span>   <span class="o">-</span><span class="mf">3.448621</span>  <span class="o">-</span><span class="mf">3.757808</span>   <span class="mf">2.135087</span>   <span class="mf">6.158099</span>  <span class="o">-</span><span class="mf">0.756587</span>  <span class="o">-</span><span class="mf">24.430689</span>   <span class="mf">23.652427</span>  <span class="o">-</span><span class="mf">11.180313</span>
+<span class="mi">61</span>      <span class="mf">0.000079</span>   <span class="o">-</span><span class="mf">2.437831</span>   <span class="mf">1.538254</span>  <span class="o">-</span><span class="mf">1.779137</span>   <span class="mf">9.956491</span>  <span class="o">-</span><span class="mf">0.705905</span>  <span class="o">-</span><span class="mf">25.743333</span>   <span class="mf">23.104332</span>  <span class="o">-</span><span class="mf">11.575205</span>
+<span class="mi">62</span>     <span class="o">-</span><span class="mf">0.000571</span>   <span class="o">-</span><span class="mf">5.140423</span>   <span class="mf">0.261719</span>  <span class="o">-</span><span class="mf">1.144619</span>   <span class="mf">7.897809</span>  <span class="o">-</span><span class="mf">0.525376</span>  <span class="o">-</span><span class="mf">27.532826</span>   <span class="mf">22.534573</span>  <span class="o">-</span><span class="mf">12.688364</span>
+<span class="mi">63</span>     <span class="o">-</span><span class="mf">0.000354</span>   <span class="o">-</span><span class="mf">4.333899</span>   <span class="mf">3.133827</span>  <span class="o">-</span><span class="mf">1.938026</span>   <span class="mf">8.523099</span>  <span class="o">-</span><span class="mf">0.204046</span>  <span class="o">-</span><span class="mf">29.392758</span>   <span class="mf">21.758538</span>  <span class="o">-</span><span class="mf">13.359394</span>
+<span class="mi">64</span>     <span class="o">-</span><span class="mf">0.001737</span>   <span class="o">-</span><span class="mf">4.135100</span>   <span class="mf">0.606762</span>  <span class="o">-</span><span class="mf">0.008077</span>  <span class="o">-</span><span class="mf">0.908704</span>  <span class="o">-</span><span class="mf">1.573666</span>  <span class="o">-</span><span class="mf">31.232862</span>   <span class="mf">21.071040</span>  <span class="o">-</span><span class="mf">14.412521</span>
+</pre></div>
+</div>
+<p>Our goal is to forecast non-farm payrolls (PAYEMS), so we’ll set that as our dependent variable. We are going to predict PAYEMS using the five principal factors (components) from FRED, with the first 3 factors included as GTVPs. These factors are going to be lagged by 1 and we are going to be making predictions on a one-period forecast horizon:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">### Variable from FRED</span>
+<span class="n">my_var</span> <span class="o">=</span> <span class="s2">&quot;PAYEMS&quot;</span>
+
+<span class="c1">### Number of factors</span>
+<span class="n">my_k</span> <span class="o">=</span> <span class="mi">5</span>
+
+<span class="c1">### First number of factors in linear eqn</span>
+<span class="n">my_x</span> <span class="o">=</span> <span class="mi">3</span>
+
+<span class="c1">### Lags</span>
+<span class="n">my_p</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="c1">### Forecast Horizon</span>
+<span class="n">hor</span> <span class="o">=</span> <span class="mi">3</span>
+</pre></div>
+</div>
+<p>We’re going to want to save our forest output, so we’ll create an array where the output can be stored. We can also set the seed for replicability:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">r_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="nf">np.set_seed</span><span class="p">(</span><span class="m">1234</span><span class="p">)</span> <span class="c1"># numPy is imported automatically with MRF!</span>
+</pre></div>
+</div>
 </section>
 <section id="implementation-example-financial-trading">
 <h3>Implementation Example: Financial Trading<a class="headerlink" href="#implementation-example-financial-trading" title="Permalink to this headline"></a></h3>
@@ -218,8 +264,8 @@
 </section>
 <section id="r">
 <h2>R<a class="headerlink" href="#r" title="Permalink to this headline"></a></h2>
-<section id="implementation-example-simulated-data">
-<h3>Implementation Example: Simulated Data<a class="headerlink" href="#implementation-example-simulated-data" title="Permalink to this headline"></a></h3>
+<section id="id2">
+<h3>Implementation Example: Simple One-Step Forecasting<a class="headerlink" href="#id2" title="Permalink to this headline"></a></h3>
 <p>As a way to get started, we can run a simulation to create a simple synthetic data set:</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">set.seed</span><span class="p">(</span><span class="m">0</span><span class="p">)</span>
 <span class="n">data</span><span class="o">=</span><span class="nf">matrix</span><span class="p">(</span><span class="nf">rnorm</span><span class="p">(</span><span class="m">15</span><span class="o">*</span><span class="m">200</span><span class="p">),</span><span class="m">200</span><span class="p">,</span><span class="m">15</span><span class="p">)</span>
@@ -295,7 +341,7 @@
 <span class="n">start_date</span> <span class="o">&lt;-</span> <span class="s">&quot;2003-01-01&quot;</span>
 
 <span class="c1">### Forecast Horizon</span>
-<span class="n">hor</span> <span class="o">&lt;-</span> <span class="m">1</span>
+<span class="n">hor</span> <span class="o">&lt;-</span> <span class="m">3</span>
 </pre></div>
 </div>
 <p>With our forecasting setup defined, let’s read the data from FRED:</p>
@@ -366,7 +412,7 @@
 <span class="nf">colnames</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span> <span class="o">&lt;-</span> <span class="nf">c</span><span class="p">(</span><span class="n">my_var</span><span class="p">,</span> <span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;F_&quot;</span><span class="p">,</span> <span class="m">1</span><span class="o">:</span><span class="n">my_k</span><span class="p">),</span> <span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;MAF_&quot;</span><span class="p">,</span> <span class="m">1</span><span class="o">:</span><span class="n">my_x</span><span class="p">))</span>
 </pre></div>
 </div>
-<p>We’re going to want to save our forest output, so we’ll create an array where the output can be stored. We can also set the seed for replicability:</p>
+<p>We’re going to want to save our forest output as we loop through to the eventual forecast horizon, so we’ll create an array where the output can be stored. We can also set the seed for replicability:</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">r_list</span> <span class="o">&lt;-</span> <span class="nf">list</span><span class="p">()</span>
 <span class="nf">set.seed</span><span class="p">(</span><span class="m">1234</span><span class="p">)</span>
 </pre></div>
@@ -422,29 +468,22 @@
 
 <span class="nf">print</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
 
-<span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="m">530.0887</span>
+<span class="p">[</span><span class="m">1</span><span class="p">]</span>  <span class="m">547.6148</span>  <span class="m">845.8643</span> <span class="m">1286.3425</span>
 </pre></div>
 </div>
-<p>And there we have it, our final forecasted value is 530.0887. If we want, we can also access the pre-ensembled forecasts:</p>
-<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">&lt;-</span> <span class="m">149629</span> <span class="o">*</span> <span class="nf">exp</span><span class="p">(</span><span class="n">r_list</span><span class="p">[[</span><span class="m">1</span><span class="p">]]</span><span class="o">$</span><span class="n">pred.ensemble</span><span class="p">)</span> <span class="o">-</span> <span class="m">149629</span>
-<span class="n">d_df</span> <span class="o">&lt;-</span> <span class="nf">data.frame</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>Let’s visualise the range of our pre-ensembled forecasts by plotting the distribution:</p>
-<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">ggplot</span><span class="p">(</span><span class="n">d_df</span><span class="p">)</span> <span class="o">+</span>
-<span class="nf">theme_bw</span><span class="p">()</span> <span class="o">+</span>
-<span class="nf">aes</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">d</span><span class="p">)</span> <span class="o">+</span>
-<span class="nf">geom_density</span><span class="p">(</span><span class="n">adjust</span> <span class="o">=</span> <span class="m">2</span><span class="p">,</span><span class="n">fill</span> <span class="o">=</span> <span class="s">&quot;grey&quot;</span><span class="p">)</span> <span class="o">+</span>
-<span class="nf">xlim</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">1000</span><span class="p">))</span> <span class="o">+</span>
-<span class="nf">geom_vline</span><span class="p">(</span><span class="n">xintercept</span> <span class="o">=</span> <span class="nf">median</span><span class="p">(</span><span class="n">d</span><span class="p">))</span> <span class="o">+</span>
-<span class="nf">theme</span><span class="p">(</span><span class="n">plot.background</span> <span class="o">=</span> <span class="nf">element_rect</span><span class="p">(</span><span class="n">fill</span> <span class="o">=</span> <span class="s">&quot;transparent&quot;</span><span class="p">,</span> <span class="n">colour</span> <span class="o">=</span> <span class="kc">NA</span><span class="p">))</span><span class="o">+</span>
-<span class="nf">ggtitle</span><span class="p">(</span><span class="s">&quot;Distribution (density) of pre-ensembled forecasts&quot;</span><span class="p">)</span> <span class="o">+</span>
-<span class="nf">theme</span><span class="p">(</span><span class="n">plot.title</span> <span class="o">=</span> <span class="nf">element_text</span><span class="p">(</span><span class="n">hjust</span> <span class="o">=</span> <span class="m">0.5</span><span class="p">))</span> <span class="o">+</span>
-<span class="nf">xlab</span><span class="p">(</span><span class="s">&quot;Forecast&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<img alt="_images/dist_d.png" src="_images/dist_d.png" />
-</section>
+<p>And there we have it, our forecasts are as follows:</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}\begin{equation*}
+\begin{aligned}
+\begin{aligned}
+\hat{y}_{t+1|t} = 547.6148 \\
+\hat{y}_{t+2|t} = 845.8643 \\
+\hat{y}_{t+3|t} = 1286.3425
+\end{aligned}
+\end{aligned}
+\end{equation*}\end{split}\]</div>
+<p>We can also look at the GTVPs. The following plots the constant term <span class="math notranslate nohighlight">\(\beta_0\)</span> (top left), the coefficient corresponding to the first factor <span class="math notranslate nohighlight">\(\beta_1\)</span> (top right), second factor <span class="math notranslate nohighlight">\(\beta_2\)</span> (bottom left) and third factor <span class="math notranslate nohighlight">\(\beta_3\)</span> (bottom right):</p>
+<img alt="_images/rfac.svg" src="_images/rfac.svg" /></section>
 </section>
 </section>
 

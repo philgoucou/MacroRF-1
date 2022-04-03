@@ -11,7 +11,7 @@ The following provide instructive examples on how to run MRF to generate forecas
 
 It is recommended that you see :ref:`Docs <docs>`, particularly the MRF module, before you proceed. You can proceed with the below as an example of how to get started. 
 
-Implementation Example: Simulated Example
+Implementation Example: Simple One-Step Forecasting
 +++++++++++++++++++++++++++
 
 First order of business is to import MRF and matplotlib, a useful plotting package:
@@ -37,16 +37,13 @@ We can take a look at this data using :code:`display(simulated_data.head(5))`::
      3     1.769591  1.272429    0.593841    0.459622 ...   1.118214   -1.597299    4 
      4     2.299628  0.414641    0.775634    1.616626 ...   -0.739658   0.374999    5 
 
-
-
-
 Let's say we want to predict the last 50 observations. We can set up our oos_pos as follows:
 
 .. code-block:: python
 
    oos_pos = np.arange(len(simulated_data) - 50 , len(simulated_data)) # lower should be oos start, upper the length of your dataset
 
-Notice that our desired :math:`y_t` is in column position 0, so we will pass :code:`y_pos = 0`. Our desired :math:`X_t` are in index positions 1, 2 and 3, since we want our first 3 predictors to be time-varying, so we will pass :code:`np.arange(1, 4)` as x_pos. S_pos we will omit from our arguments, since we want all of our extra exogenous variables to be included in our overall predictor set.
+Notice that our desired :math:`y_t` is in column position 0, so we will pass :code:`y_pos = 0`. Our desired :math:`X_t` are in index positions 1, 2 and 3, since we want our first 3 predictors to be time-varying, so we will pass :code:`x_pos = np.arange(1, 4)`. S_pos we will omit from our arguments, since we want all of our extra exogenous variables to be included in our overall predictor set.
 
 If we want to speed things up, we can also select :code:`parallelise = True` and :code:`n_cores = 3` to run the code across 3 cores on our machine. 
 
@@ -113,6 +110,7 @@ And, last but not least, the GTVPs:
    MRF.band_plots()
 
 .. image:: /images/GTVPs.png
+
 
 Implementation Example: Financial Trading
 +++++++++++++++++++++++++++
@@ -185,7 +183,7 @@ The following shows the financial trading performance of MRF (green), implementi
 R 
 ----------------------------
 
-Implementation Example: Simulated Data
+Implementation Example: Simple One-Step Forecasting
 +++++++++++++++++++++++++++
 
 As a way to get started, we can run a simulation to create a simple synthetic data set:
@@ -285,7 +283,7 @@ Our goal is to forecast non-farm payrolls, so we'll set that as our dependent va
    start_date <- "2003-01-01"
 
    ### Forecast Horizon
-   hor <- 1
+   hor <- 3
 
 With our forecasting setup defined, let's read the data from FRED:
 
@@ -365,7 +363,7 @@ Let's set up our variables for easy access:
    Y <- cbind(X, Fmat, MAFmat)
    colnames(Y) <- c(my_var, paste0("F_", 1:my_k), paste0("MAF_", 1:my_x))
 
-We're going to want to save our forest output, so we'll create an array where the output can be stored. We can also set the seed for replicability:
+We're going to want to save our forest output as we loop through to the eventual forecast horizon, so we'll create an array where the output can be stored. We can also set the seed for replicability:
 
 .. code-block:: r
 
@@ -428,28 +426,23 @@ That's it! Our models are fit and the training is finished. All we need to do no
 
    print(y)
    
-   [1] 530.0887
+   [1]  547.6148  845.8643 1286.3425
 
-And there we have it, our final forecasted value is 530.0887. If we want, we can also access the pre-ensembled forecasts:
+And there we have it, our forecasts are as follows:
 
-.. code-block:: r
+.. math::
+   
+   \begin{equation*}
+   \begin{aligned}
+   \begin{aligned}
+   \hat{y}_{t+1|t} = 547.6148 \\
+   \hat{y}_{t+2|t} = 845.8643 \\
+   \hat{y}_{t+3|t} = 1286.3425
+   \end{aligned}
+   \end{aligned} 
+   \end{equation*} 
 
-   d <- 149629 * exp(r_list[[1]]$pred.ensemble) - 149629
-   d_df <- data.frame(d)
 
-Let's visualise the range of our pre-ensembled forecasts by plotting the distribution:
+We can also look at the GTVPs. The following plots the constant term :math:`\beta_0` (top left), the coefficient corresponding to the first factor :math:`\beta_1` (top right), second factor :math:`\beta_2` (bottom left) and third factor :math:`\beta_3` (bottom right):
 
-.. code-block:: r
-
-   ggplot(d_df) +
-   theme_bw() +
-   aes(x = d) +
-   geom_density(adjust = 2,fill = "grey") +
-   xlim(c(0, 1000)) +
-   geom_vline(xintercept = median(d)) +
-   theme(plot.background = element_rect(fill = "transparent", colour = NA))+
-   ggtitle("Distribution (density) of pre-ensembled forecasts") +
-   theme(plot.title = element_text(hjust = 0.5)) +
-   xlab("Forecast") 
-
-.. image:: /images/dist_d.png
+.. image:: /images/rfac.svg
