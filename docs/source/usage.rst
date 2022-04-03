@@ -101,7 +101,7 @@ Firstly, the predictions:
    ax.set_xlabel(r"$t$", fontsize = 16)
    ax.set_title("OOS predictions of MRF", fontsize = 15)
 
-.. image:: /images/OOS_pred.png
+.. image:: /images/OOS_preds.png
 
 And, last but not least, the GTVPs:
 

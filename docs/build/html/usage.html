@@ -45,7 +45,6 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#python">Python</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#implementation-example-simple-one-step-forecasting">Implementation Example: Simple One-Step Forecasting</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#implementation-example-complex-multi-step-forecasting">Implementation Example: Complex Multi-Step Forecasting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#implementation-example-financial-trading">Implementation Example: Financial Trading</a></li>
 </ul>
 </li>
@@ -159,57 +158,12 @@
 <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;OOS predictions of MRF&quot;</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">15</span><span class="p">)</span>
 </pre></div>
 </div>
-<img alt="_images/OOS_pred.png" src="_images/OOS_pred.png" />
+<img alt="_images/OOS_preds.png" src="_images/OOS_preds.png" />
 <p>And, last but not least, the GTVPs:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">MRF</span><span class="o">.</span><span class="n">band_plots</span><span class="p">()</span>
 </pre></div>
 </div>
 <img alt="_images/GTVPs.png" src="_images/GTVPs.png" />
-</section>
-<section id="implementation-example-complex-multi-step-forecasting">
-<h3>Implementation Example: Complex Multi-Step Forecasting<a class="headerlink" href="#implementation-example-complex-multi-step-forecasting" title="Permalink to this headline"></a></h3>
-<p>Let’s say that our goal is to forecast non-farm payrolls using principal components (factors) of the FRED macroeconomic data base (FREDMD).</p>
-<p>Let’s firstly load MRF, numpy and pandas.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MRF</span> <span class="kn">import</span> <span class="o">*</span>
-</pre></div>
-</div>
-<p>We are also going to download the processed FRED data file, which has already handled appropriate PCA transformations for us:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">URL</span> <span class="o">=</span> <span class="s1">&#39;https://drive.google.com/file/d/1Alr-eHbMhKvKnlPaL6x3sP9CKe21Zxr6/view?usp=sharing&#39;</span>
-<span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;https://drive.google.com/uc?export=download&amp;id=&#39;</span><span class="o">+</span><span class="n">URL</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">index_col</span> <span class="o">=</span> <span class="s2">&quot;Unnamed: 0&quot;</span><span class="p">)</span>
-</pre></div>
-</div>
-<p>We can take a look at this data using <code class="code docutils literal notranslate"><span class="pre">display(df.head(5))</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">index</span>    <span class="n">PAYEMS</span>       <span class="n">F_1</span>         <span class="n">F_2</span>        <span class="n">F_3</span>        <span class="n">F_4</span>        <span class="n">F_5</span>       <span class="n">MAF_1</span>       <span class="n">MAF_2</span>       <span class="n">MAF_3</span>
-<span class="mi">60</span>      <span class="mf">0.000781</span>   <span class="o">-</span><span class="mf">3.448621</span>  <span class="o">-</span><span class="mf">3.757808</span>   <span class="mf">2.135087</span>   <span class="mf">6.158099</span>  <span class="o">-</span><span class="mf">0.756587</span>  <span class="o">-</span><span class="mf">24.430689</span>   <span class="mf">23.652427</span>  <span class="o">-</span><span class="mf">11.180313</span>
-<span class="mi">61</span>      <span class="mf">0.000079</span>   <span class="o">-</span><span class="mf">2.437831</span>   <span class="mf">1.538254</span>  <span class="o">-</span><span class="mf">1.779137</span>   <span class="mf">9.956491</span>  <span class="o">-</span><span class="mf">0.705905</span>  <span class="o">-</span><span class="mf">25.743333</span>   <span class="mf">23.104332</span>  <span class="o">-</span><span class="mf">11.575205</span>
-<span class="mi">62</span>     <span class="o">-</span><span class="mf">0.000571</span>   <span class="o">-</span><span class="mf">5.140423</span>   <span class="mf">0.261719</span>  <span class="o">-</span><span class="mf">1.144619</span>   <span class="mf">7.897809</span>  <span class="o">-</span><span class="mf">0.525376</span>  <span class="o">-</span><span class="mf">27.532826</span>   <span class="mf">22.534573</span>  <span class="o">-</span><span class="mf">12.688364</span>
-<span class="mi">63</span>     <span class="o">-</span><span class="mf">0.000354</span>   <span class="o">-</span><span class="mf">4.333899</span>   <span class="mf">3.133827</span>  <span class="o">-</span><span class="mf">1.938026</span>   <span class="mf">8.523099</span>  <span class="o">-</span><span class="mf">0.204046</span>  <span class="o">-</span><span class="mf">29.392758</span>   <span class="mf">21.758538</span>  <span class="o">-</span><span class="mf">13.359394</span>
-<span class="mi">64</span>     <span class="o">-</span><span class="mf">0.001737</span>   <span class="o">-</span><span class="mf">4.135100</span>   <span class="mf">0.606762</span>  <span class="o">-</span><span class="mf">0.008077</span>  <span class="o">-</span><span class="mf">0.908704</span>  <span class="o">-</span><span class="mf">1.573666</span>  <span class="o">-</span><span class="mf">31.232862</span>   <span class="mf">21.071040</span>  <span class="o">-</span><span class="mf">14.412521</span>
-</pre></div>
-</div>
-<p>Our goal is to forecast non-farm payrolls (PAYEMS), so we’ll set that as our dependent variable. We are going to predict PAYEMS using the five principal factors (components) from FRED, with the first 3 factors included as GTVPs. These factors are going to be lagged by 1 and we are going to be making predictions on a one-period forecast horizon:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">### Variable from FRED</span>
-<span class="n">my_var</span> <span class="o">=</span> <span class="s2">&quot;PAYEMS&quot;</span>
-
-<span class="c1">### Number of factors</span>
-<span class="n">my_k</span> <span class="o">=</span> <span class="mi">5</span>
-
-<span class="c1">### First number of factors in linear eqn</span>
-<span class="n">my_x</span> <span class="o">=</span> <span class="mi">3</span>
-
-<span class="c1">### Lags</span>
-<span class="n">my_p</span> <span class="o">=</span> <span class="mi">1</span>
-
-<span class="c1">### Forecast Horizon</span>
-<span class="n">hor</span> <span class="o">=</span> <span class="mi">3</span>
-</pre></div>
-</div>
-<p>We’re going to want to save our forest output, so we’ll create an array where the output can be stored. We can also set the seed for replicability:</p>
-<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">r_list</span> <span class="o">=</span> <span class="p">[]</span>
-<span class="nf">np.set_seed</span><span class="p">(</span><span class="m">1234</span><span class="p">)</span> <span class="c1"># numPy is imported automatically with MRF!</span>
-</pre></div>
-</div>
 </section>
 <section id="implementation-example-financial-trading">
 <h3>Implementation Example: Financial Trading<a class="headerlink" href="#implementation-example-financial-trading" title="Permalink to this headline"></a></h3>

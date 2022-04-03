@@ -101,7 +101,7 @@ Firstly, the predictions:
    ax.set_xlabel(r"$t$", fontsize = 16)
    ax.set_title("OOS predictions of MRF", fontsize = 15)
 
-.. image:: /images/OOS_pred.png
+.. image:: /images/OOS_preds.png
 
 And, last but not least, the GTVPs:
 
@@ -110,60 +110,6 @@ And, last but not least, the GTVPs:
    MRF.band_plots()
 
 .. image:: /images/GTVPs.png
-
-Implementation Example: Complex Multi-Step Forecasting
-+++++++++++++++++++++++++++
-
-Let’s say that our goal is to forecast non-farm payrolls using principal components (factors) of the FRED macroeconomic data base (FREDMD).
-
-Let’s firstly load MRF, numpy and pandas.
-
-.. code-block:: python
-
-   from MRF import *
-
-We are also going to download the processed FRED data file, which has already handled appropriate PCA transformations for us:
-
-.. code-block:: python
-
-   URL = 'https://drive.google.com/file/d/1Alr-eHbMhKvKnlPaL6x3sP9CKe21Zxr6/view?usp=sharing'
-   path = 'https://drive.google.com/uc?export=download&id='+URL.split('/')[-2]
-   df = pd.read_csv(path, index_col = "Unnamed: 0")
-
-We can take a look at this data using :code:`display(df.head(5))`::
-
-   index    PAYEMS       F_1         F_2        F_3        F_4        F_5       MAF_1       MAF_2       MAF_3
-   60      0.000781   -3.448621  -3.757808   2.135087   6.158099  -0.756587  -24.430689   23.652427  -11.180313 
-   61      0.000079   -2.437831   1.538254  -1.779137   9.956491  -0.705905  -25.743333   23.104332  -11.575205 
-   62     -0.000571   -5.140423   0.261719  -1.144619   7.897809  -0.525376  -27.532826   22.534573  -12.688364 
-   63     -0.000354   -4.333899   3.133827  -1.938026   8.523099  -0.204046  -29.392758   21.758538  -13.359394
-   64     -0.001737   -4.135100   0.606762  -0.008077  -0.908704  -1.573666  -31.232862   21.071040  -14.412521
-
-Our goal is to forecast non-farm payrolls (PAYEMS), so we'll set that as our dependent variable. We are going to predict PAYEMS using the five principal factors (components) from FRED, with the first 3 factors included as GTVPs. These factors are going to be lagged by 1 and we are going to be making predictions on a one-period forecast horizon:
-
-.. code-block:: python
-
-   ### Variable from FRED
-   my_var = "PAYEMS"
-
-   ### Number of factors 
-   my_k = 5
-
-   ### First number of factors in linear eqn
-   my_x = 3
-
-   ### Lags
-   my_p = 1
-
-   ### Forecast Horizon
-   hor = 3
-
-We're going to want to save our forest output, so we'll create an array where the output can be stored. We can also set the seed for replicability:
-
-.. code-block:: r
-
-   r_list = []
-   np.set_seed(1234) # numPy is imported automatically with MRF!
 
 
 Implementation Example: Financial Trading
