@@ -24,7 +24,7 @@ Macroeconomic Random Forest
             
             <a href="https://github.com/RyanLucas3/MacroRandomForest">
                 <img src="./_static/svg/GH_2.svg"
-                    alt="Maintained?" width="70" height="20"></a> &nbsp;
+                    alt="Github" width="70" height="20"></a> &nbsp;
         </p>
    </embed>
 
