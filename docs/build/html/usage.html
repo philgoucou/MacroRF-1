@@ -46,13 +46,14 @@
 <li class="toctree-l2"><a class="reference internal" href="#python">Python</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#implementation-example-simple-one-step-forecasting">Implementation Example: Simple One-Step Forecasting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#implementation-example-one-step-macro-forecasting">Implementation Example: One-Step Macro Forecasting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implementation-example-multi-step-macro-forecasting">Implementation Example: Multi-Step Macro Forecasting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#implementation-example-financial-trading">Implementation Example: Financial Trading</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#r">R</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id2">Implementation Example: Simple One-Step Forecasting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id3">Implementation Example: One-Step Macro Forecasting</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#implementation-example-multi-step-macro-forecasting">Implementation Example: Multi-Step Macro Forecasting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id4">Implementation Example: Multi-Step Macro Forecasting</a></li>
 </ul>
 </li>
 </ul>
@@ -110,11 +111,24 @@
   <span class="mi">4</span>     <span class="mf">2.299628</span>  <span class="mf">0.414641</span>    <span class="mf">0.775634</span>    <span class="mf">1.616626</span> <span class="o">...</span>   <span class="o">-</span><span class="mf">0.739658</span>   <span class="mf">0.374999</span>    <span class="mi">5</span>
 </pre></div>
 </div>
+<p>We want to predict sim_y (<span class="math notranslate nohighlight">\(y_t\)</span>) using all variables in our data set (<span class="math notranslate nohighlight">\(S_t\)</span>), but we only want to include the first 3 variables (<span class="math notranslate nohighlight">\(X_t\)</span>) in the linear equation to get time-varying parameters.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">### Dependent Variable</span>
+<span class="n">my_var</span> <span class="o">=</span> <span class="s2">&quot;sim_y&quot;</span>
+<span class="n">y_pos</span> <span class="o">=</span> <span class="n">simulated_data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">get_loc</span><span class="p">(</span><span class="n">my_var</span><span class="p">)</span>
+
+<span class="c1">### Exogenous Variables</span>
+<span class="n">S_vars</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;sim_x</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">16</span><span class="p">)]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;trend&#39;</span><span class="p">]</span>
+<span class="n">S_pos</span> <span class="o">=</span> <span class="p">[</span><span class="n">simulated_data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">get_loc</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">S_vars</span><span class="p">]</span>
+
+<span class="c1">### Variables Included in Linear Equation</span>
+<span class="n">x_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;sim_x1&quot;</span><span class="p">,</span> <span class="s1">&#39;sim_x2&#39;</span><span class="p">,</span> <span class="s1">&#39;sim_x3&#39;</span><span class="p">]</span>
+<span class="n">x_pos</span> <span class="o">=</span> <span class="p">[</span><span class="n">simulated_data</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">get_loc</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">x_vars</span><span class="p">]</span>
+</pre></div>
+</div>
 <p>Let’s say we want to predict the last 50 observations. We can set up our oos_pos as follows:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">oos_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">simulated_data</span><span class="p">)</span> <span class="o">-</span> <span class="mi">50</span> <span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">simulated_data</span><span class="p">))</span> <span class="c1"># lower should be oos start, upper the length of your dataset</span>
 </pre></div>
 </div>
-<p>Notice that our desired <span class="math notranslate nohighlight">\(y_t\)</span> is in column position 0, so we will pass <code class="code docutils literal notranslate"><span class="pre">y_pos</span> <span class="pre">=</span> <span class="pre">0</span></code>. Our desired <span class="math notranslate nohighlight">\(X_t\)</span> are in index positions 1, 2 and 3, since we want our first 3 predictors to be time-varying, so we will pass <code class="code docutils literal notranslate"><span class="pre">x_pos</span> <span class="pre">=</span> <span class="pre">np.arange(1,</span> <span class="pre">4)</span></code>. S_pos we will omit from our arguments, since we want all of our extra exogenous variables to be included in our overall predictor set.</p>
 <p>If we want to speed things up, we can also select <code class="code docutils literal notranslate"><span class="pre">parallelise</span> <span class="pre">=</span> <span class="pre">True</span></code> and <code class="code docutils literal notranslate"><span class="pre">n_cores</span> <span class="pre">=</span> <span class="pre">3</span></code> to run the code across 3 cores on our machine.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -123,8 +137,9 @@
 <p>The remaining hyperparameters we have chosen are relatively standard and the user should see <a class="reference internal" href="modules.html#docs"><span class="std std-ref">Docs</span></a> if they want to know more details.</p>
 <p>Now we are ready to implement:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">MRF</span> <span class="o">=</span> <span class="n">MacroRandomForest</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">simulated_data</span><span class="p">,</span>
-                        <span class="n">y_pos</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                        <span class="n">x_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">),</span>
+                        <span class="n">y_pos</span> <span class="o">=</span> <span class="n">y_pos</span><span class="p">,</span>
+                        <span class="n">x_pos</span> <span class="o">=</span> <span class="n">x_pos</span><span class="p">,</span>
+                        <span class="n">S_pos</span> <span class="o">=</span> <span class="n">S_pos</span><span class="p">,</span>
                         <span class="n">B</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
                         <span class="n">parallelise</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
                         <span class="n">n_cores</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
@@ -166,18 +181,18 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">MRF</span><span class="o">.</span><span class="n">band_plots</span><span class="p">()</span>
 </pre></div>
 </div>
-<img alt="_images/GTVPs.png" src="_images/GTVPs.png" />
+<img alt="_images/sim_bands.png" src="_images/sim_bands.png" />
 </section>
 <section id="implementation-example-one-step-macro-forecasting">
 <h3>Implementation Example: One-Step Macro Forecasting<a class="headerlink" href="#implementation-example-one-step-macro-forecasting" title="Permalink to this headline"></a></h3>
+<p>Let’s say that our goal is to forecast non-farm payrolls one period ahead using the principal components (factors) of the FRED macroeconomic database (FREDMD).</p>
 <p>First order of business is to import MRF, seaborn (a useful plotting package) and numPy (for numerical calculations):</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MRF</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 </pre></div>
 </div>
-<p>Let’s say that our goal is to forecast non-farm payrolls one period ahead using the principal components (factors) of the FRED macroeconomic data base (FREDMD).</p>
-<p>To download the data set, we simply need to scrape it from a Google Drive link as follows:</p>
+<p>To download the FREDMD data set, we simply need to scrape it from a Google Drive link as follows:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">url</span><span class="o">=</span><span class="s1">&#39;https://drive.google.com/file/d/1qYigHu6mygtmxceLTGACV206u7RQsopq/view?usp=sharing&#39;</span>
 <span class="n">url</span><span class="o">=</span><span class="s1">&#39;https://drive.google.com/uc?id=&#39;</span> <span class="o">+</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">index_col</span> <span class="o">=</span> <span class="s2">&quot;Unnamed: 0&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
@@ -234,7 +249,7 @@
 
 <span class="nb">print</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span>
 
-<span class="mf">0.0036527161575421736</span>
+<span class="mf">0.0036531595778754606</span>
 </pre></div>
 </div>
 <p>This gives us our predicted log-difference. Now we have to convert that back to the original units:</p>
@@ -242,10 +257,10 @@
 
 <span class="nb">print</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
 
-<span class="mf">547.551682547529</span>
+<span class="mf">547.6182739258802</span>
 </pre></div>
 </div>
-<p>And there we have it, our final forecasted value is 542.5337569539552. If we want, we can also access the pre-ensembled forecasts:</p>
+<p>And there we have it, our final forecasted value is 547.6182739258802. If we want, we can also access the pre-ensembled forecasts:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">=</span> <span class="p">[</span><span class="mi">149629</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">))</span> <span class="o">-</span> <span class="mi">149629</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">MRF_output</span><span class="p">[</span><span class="s1">&#39;pred_ensemble&#39;</span><span class="p">]]</span>
 </pre></div>
 </div>
@@ -265,6 +280,62 @@
 </pre></div>
 </div>
 <img alt="_images/Python_nfpr.png" src="_images/Python_nfpr.png" />
+<p>We can also look at the GTVPs to visualise the change in the coefficients corresponding to the constant (<span class="math notranslate nohighlight">\(\beta_0\)</span>, top-left), the lagged dependent variable (<span class="math notranslate nohighlight">\(\beta_1\)</span>, top-right) and the rest of the principal components corresponding to our chosen <span class="math notranslate nohighlight">\(X_t\)</span>.</p>
+<img alt="_images/Python_nfpr_GTVPs_2.png" src="_images/Python_nfpr_GTVPs_2.png" />
+</section>
+<section id="implementation-example-multi-step-macro-forecasting">
+<h3>Implementation Example: Multi-Step Macro Forecasting<a class="headerlink" href="#implementation-example-multi-step-macro-forecasting" title="Permalink to this headline"></a></h3>
+<p>Let’s say that our goal is to forecast inflation (CPI) three periods ahead using the principal components (factors) of the FRED macroeconomic database (FREDMD).</p>
+<p>Firstly, we will need to load MRF.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MRF</span> <span class="kn">import</span> <span class="o">*</span>
+</pre></div>
+</div>
+<p>To download our FREDMD data set, we simply need to scrape it from a Google Drive link as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">url</span><span class="o">=</span><span class="s1">&#39;https://drive.google.com/file/d/1AG7oUfG03wH6-OPFm0sxdsAcutt2jdbn/view?usp=sharing&#39;</span>
+<span class="n">url</span><span class="o">=</span><span class="s1">&#39;https://drive.google.com/uc?id=&#39;</span> <span class="o">+</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">index_col</span> <span class="o">=</span> <span class="s2">&quot;Unnamed: 0&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can take a look at this dataset before we proceed:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">index</span>  <span class="n">CPIAUCSL</span>    <span class="n">F_1</span>       <span class="n">F_2</span>       <span class="n">F_3</span>       <span class="n">F_4</span>       <span class="n">F_5</span>       <span class="n">MAF_1</span>    <span class="n">MAF_2</span>      <span class="n">MAF_3</span>    <span class="n">Trend</span>
+
+<span class="mi">0</span>      <span class="mf">0.002158</span>  <span class="mf">1.173100</span>  <span class="mf">0.172975</span> <span class="o">-</span><span class="mf">3.420704</span> <span class="o">-</span><span class="mf">1.360721</span> <span class="o">-</span><span class="mf">2.099334</span> <span class="o">-</span><span class="mf">4.068628</span>  <span class="mf">4.708296</span> <span class="o">-</span><span class="mf">13.407287</span>      <span class="mi">1</span>
+<span class="mi">1</span>      <span class="mf">0.001604</span>  <span class="mf">2.049119</span>  <span class="mf">0.785785</span> <span class="o">-</span><span class="mf">3.070974</span> <span class="o">-</span><span class="mf">0.773570</span> <span class="o">-</span><span class="mf">1.854451</span> <span class="o">-</span><span class="mf">4.226717</span>  <span class="mf">3.971370</span> <span class="o">-</span><span class="mf">13.633706</span>      <span class="mi">2</span>
+<span class="mi">2</span>     <span class="o">-</span><span class="mf">0.002159</span>  <span class="mf">1.074777</span> <span class="o">-</span><span class="mf">2.870071</span> <span class="o">-</span><span class="mf">0.030658</span> <span class="o">-</span><span class="mf">0.757934</span> <span class="o">-</span><span class="mf">2.659571</span> <span class="o">-</span><span class="mf">5.273620</span>  <span class="mf">3.157967</span> <span class="o">-</span><span class="mf">12.326495</span>      <span class="mi">3</span>
+<span class="mi">3</span>     <span class="o">-</span><span class="mf">0.000005</span>  <span class="mf">1.588660</span> <span class="o">-</span><span class="mf">2.648067</span> <span class="o">-</span><span class="mf">1.283088</span>  <span class="mf">0.118267</span> <span class="o">-</span><span class="mf">1.761513</span> <span class="o">-</span><span class="mf">6.650085</span>  <span class="mf">2.691071</span> <span class="o">-</span><span class="mf">10.964577</span>      <span class="mi">4</span>
+<span class="mi">4</span>     <span class="o">-</span><span class="mf">0.000538</span>  <span class="mf">1.728049</span> <span class="o">-</span><span class="mf">3.852286</span> <span class="o">-</span><span class="mf">1.425368</span> <span class="o">-</span><span class="mf">4.038225</span> <span class="o">-</span><span class="mf">0.612198</span> <span class="o">-</span><span class="mf">8.065427</span>  <span class="mf">1.639973</span> <span class="o">-</span><span class="mf">10.627529</span>      <span class="mi">5</span>
+</pre></div>
+</div>
+<p>Our goal is to forecast CPI, so we’ll set that as our dependent variable. As predictors, we’re going to have 5 factors (principal components) of the FREDMD database with the first three (our <span class="math notranslate nohighlight">\(X_t\)</span>) included in our linear equation, all at a lag of three periods. Our data is going to start on Jan 1st 2003 and we’re going to make predictions on a three-period forecast horizon:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">### Variable from FRED</span>
+<span class="n">my_var</span> <span class="o">=</span> <span class="s2">&quot;CPIAUCSL&quot;</span>
+<span class="n">y_pos</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">get_loc</span><span class="p">(</span><span class="n">my_var</span><span class="p">)</span>
+
+<span class="c1">### Number of factors</span>
+<span class="n">my_k</span> <span class="o">=</span> <span class="mi">5</span>
+
+<span class="c1">### First number of factors in linear eqn</span>
+<span class="n">my_x</span> <span class="o">=</span> <span class="mi">3</span>
+
+<span class="c1">### Lags</span>
+<span class="n">my_p</span> <span class="o">=</span> <span class="mi">3</span>
+
+<span class="c1">### Start Date</span>
+<span class="n">start_date</span> <span class="o">=</span> <span class="s2">&quot;2003-01-01&quot;</span>
+
+<span class="c1">### Forecast Horizon</span>
+<span class="n">hor</span> <span class="o">=</span> <span class="mi">3</span>
+</pre></div>
+</div>
+<p>We’re going to want to save our forest output as we loop through to the eventual forecast horizon, so we’ll create an array where the output can be stored. We can also set the seed for replicability:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">r_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="nf">np.random.seed</span><span class="p">(</span><span class="m">1234</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And with all of that out of the way, it’s time to fit MRF! We’re going to conduct recursive forecasting by looping through from 1 until the eventual forecast horizon, each time setting our data matrix and the position of our variables that we want to be time-varying:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
 </section>
 <section id="implementation-example-financial-trading">
 <h3>Implementation Example: Financial Trading<a class="headerlink" href="#implementation-example-financial-trading" title="Permalink to this headline"></a></h3>
@@ -357,7 +428,7 @@
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">oos_position</span> <span class="o">=</span> <span class="nf">nrow</span><span class="p">(</span><span class="n">data.in</span><span class="p">)</span><span class="m">-50</span><span class="o">:</span> <span class="nf">nrow</span><span class="p">(</span><span class="n">data.in</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Once we have made our data set, we are ready to run MRF. We need to specify the position of our desired <span class="math notranslate nohighlight">\(y_t\)</span>. In our case, this variable is in the first column, so we will set <code class="code docutils literal notranslate"><span class="pre">y.pos</span> <span class="pre">=</span> <span class="pre">1</span></code>. Our desired <span class="math notranslate nohighlight">\(X_t\)</span> are in index positions 1, 2 and 3, since we want our first 3 predictors to be time-varying, so we will pass <code class="code docutils literal notranslate"><span class="pre">x.pos</span> <span class="pre">=</span> <span class="pre">2:4</span></code>. S_pos we will pass as <code class="code docutils literal notranslate"><span class="pre">s.pos</span> <span class="pre">=</span> <span class="pre">2:ncol(data.in)</span></code>, since we want all of our extra exogenous variables to be included in our overall predictor set <span class="math notranslate nohighlight">\(S_t\)</span>.</p>
+<p>Once we have made our data set, we are ready to run MRF. We need to specify the position of our desired <span class="math notranslate nohighlight">\(y_t\)</span>. In our case, this variable is in the first column, so we will set <code class="code docutils literal notranslate"><span class="pre">y.pos</span> <span class="pre">=</span> <span class="pre">1</span></code>. Our desired <span class="math notranslate nohighlight">\(X_t\)</span> are in index positions 1, 2 and 3, since we want our first 3 predictors to be time-varying, so we will pass <code class="code docutils literal notranslate"><span class="pre">x.pos</span> <span class="pre">=</span> <span class="pre">2:4</span></code>. S_pos we will pass as <code class="code docutils literal notranslate"><span class="pre">S.pos</span> <span class="pre">=</span> <span class="pre">2:ncol(data.in)</span></code>, since we want all of our extra exogenous variables to be included in our overall predictor set <span class="math notranslate nohighlight">\(S_t\)</span>.</p>
 <p>The remaining hyperparameters we have chosen are relatively standard and the user should see <a class="reference internal" href="modules.html#docs"><span class="std std-ref">Docs</span></a> if they want to know more details.</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">mrf.output</span> <span class="o">=</span> <span class="nf">MRF</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">data.in</span><span class="p">,</span>
                  <span class="n">y.pos</span> <span class="o">=</span> <span class="m">1</span><span class="p">,</span>
@@ -374,7 +445,7 @@
 <img alt="_images/R_GTVPs.svg" src="_images/R_GTVPs.svg" /></section>
 <section id="id3">
 <h3>Implementation Example: One-Step Macro Forecasting<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
-<p>Let’s say that our goal is to forecast non-farm payrolls one period ahead using the FRED macroeconomic data base (FREDMD).</p>
+<p>Let’s say that our goal is to forecast non-farm payrolls one period ahead using the FRED macroeconomic database (FREDMD).</p>
 <p>Let’s firstly load MRF. We will also load the fbi package, which let’s us read and manipulate FRED data, and several other useful libraries.</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">MacroRF</span><span class="p">)</span>
 <span class="nf">library</span><span class="p">(</span><span class="n">fbi</span><span class="p">)</span>
@@ -389,7 +460,7 @@
 </pre></div>
 </div>
 <p>With the boring stuff out of the way, let’s go about creating our forecasting setup.</p>
-<p>Our goal is to forecast non-farm payrolls, so we’ll set that as our dependent variable. As predictors, we’re going to have 5 factors of the FREDMD data base with the first three (our <span class="math notranslate nohighlight">\(X_t\)</span>) included in our linear equation, all at a lag of one. Our data is going to start on Jan 1st 2003 and we’re going to make predictions on a one-period forecast horizon:</p>
+<p>Our goal is to forecast non-farm payrolls, so we’ll set that as our dependent variable. As predictors, we’re going to have 5 factors of the FREDMD database with the first three (our <span class="math notranslate nohighlight">\(X_t\)</span>) included in our linear equation, all at a lag of one. Our data is going to start on Jan 1st 2003 and we’re going to make predictions on a one-period forecast horizon:</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="c1">### Dependent variable from FRED</span>
 <span class="n">my_var</span> <span class="o">&lt;-</span> <span class="s">&quot;PAYEMS&quot;</span>
 
@@ -570,9 +641,9 @@
 <img alt="_images/distplot.png" src="_images/distplot.png" />
 <p>We can also look at the GTVPs to visualise the change in the coefficients corresponding to the constant (<span class="math notranslate nohighlight">\(\beta_0\)</span>, top-left), the lagged dependent variable (<span class="math notranslate nohighlight">\(\beta_1\)</span>, top-right) and the rest of the principal components corresponding to our chosen <span class="math notranslate nohighlight">\(X_t\)</span>.</p>
 <img alt="_images/R_GTVPs_2_3.svg" src="_images/R_GTVPs_2_3.svg" /></section>
-<section id="implementation-example-multi-step-macro-forecasting">
-<h3>Implementation Example: Multi-Step Macro Forecasting<a class="headerlink" href="#implementation-example-multi-step-macro-forecasting" title="Permalink to this headline"></a></h3>
-<p>Let’s say that our goal is to forecast inflation (CPI) three periods ahead using the FRED macroeconomic data base (FREDMD).</p>
+<section id="id4">
+<h3>Implementation Example: Multi-Step Macro Forecasting<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h3>
+<p>Let’s say that our goal is to forecast inflation (CPI) three periods ahead using the FRED macroeconomic database (FREDMD).</p>
 <p>Firstly, we will need to load MRF. We will also load the fbi package, which let’s us read and manipulate FRED data, and several other useful libraries.</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">MacroRF</span><span class="p">)</span>
 <span class="nf">library</span><span class="p">(</span><span class="n">fbi</span><span class="p">)</span>
@@ -581,7 +652,7 @@
 <span class="nf">library</span><span class="p">(</span><span class="n">vars</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Our goal is to forecast CPI, so we’ll set that as our dependent variable. As predictors, we’re going to have 5 factors (principal components) of the FREDMD data base with the first three (our <span class="math notranslate nohighlight">\(X_t\)</span>) included in our linear equation, all at a lag of three periods. Our data is going to start on Jan 1st 2003 and we’re going to make predictions on a three-period forecast horizon:</p>
+<p>Our goal is to forecast CPI, so we’ll set that as our dependent variable. As predictors, we’re going to have 5 factors (principal components) of the FREDMD database with the first three (our <span class="math notranslate nohighlight">\(X_t\)</span>) included in our linear equation, all at a lag of three periods. Our data is going to start on Jan 1st 2003 and we’re going to make predictions on a three-period forecast horizon:</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="c1">### Variable from FRED</span>
 <span class="n">my_var</span> <span class="o">&lt;-</span> <span class="s">&quot;CPIAUCSL&quot;</span>
 
@@ -737,7 +808,26 @@
 <span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="m">-0.00156105</span>  <span class="m">0.52877814</span>  <span class="m">0.79409874</span>
 </pre></div>
 </div>
-<p>Now we have our three-step predictions for the log-difference. All that’s left to do is to convert that back to the original CPI units.</p>
+<p>Now we have our three-step predictions for the log-difference. All that’s left to do is to convert that back to the original CPI units:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">cpi</span> <span class="o">&lt;-</span> <span class="nf">c</span><span class="p">(</span><span class="m">259.007</span><span class="p">,</span><span class="m">258.165</span><span class="p">,</span><span class="m">256.094</span><span class="p">,</span><span class="m">255.944</span><span class="p">,</span><span class="m">257.217</span><span class="p">,</span><span class="m">258.543</span><span class="p">,</span><span class="m">259.580</span><span class="p">,</span><span class="m">260.190</span><span class="p">,</span><span class="m">260.352</span><span class="p">,</span><span class="m">260.721</span><span class="p">,</span><span class="m">261.564</span><span class="p">,</span><span class="m">262.200</span><span class="p">,</span><span class="m">263.346</span><span class="p">,</span><span class="m">265.028</span><span class="p">,</span><span class="m">266.727</span><span class="p">,</span>
+<span class="m">268.599</span><span class="p">,</span><span class="m">270.955</span><span class="p">,</span><span class="m">272.184</span><span class="p">,</span><span class="m">273.092</span><span class="p">,</span><span class="m">274.214</span><span class="p">,</span><span class="m">276.590</span><span class="p">,</span><span class="m">278.524</span><span class="p">,</span><span class="m">280.126</span><span class="p">,</span><span class="m">281.933</span><span class="p">)</span>
+
+<span class="n">last_log_diff</span> <span class="o">&lt;-</span> <span class="nf">log</span><span class="p">(</span><span class="n">cpi</span><span class="p">[</span><span class="m">24</span><span class="p">])</span> <span class="o">-</span> <span class="nf">log</span><span class="p">(</span><span class="n">cpi</span><span class="p">[</span><span class="m">23</span><span class="p">])</span>
+<span class="n">new_log_diff</span> <span class="o">&lt;-</span> <span class="n">last_log_diff</span> <span class="o">+</span> <span class="n">preds</span>
+
+<span class="n">new_log_diff</span>
+<span class="n">new_cpis</span> <span class="o">&lt;-</span> <span class="n">cpi</span><span class="p">[</span><span class="m">24</span><span class="p">]</span> <span class="o">*</span> <span class="nf">cumprod</span><span class="p">(</span><span class="nf">exp</span><span class="p">(</span><span class="n">new_log_diff</span><span class="p">))</span>
+
+<span class="n">cpis_mm</span> <span class="o">&lt;-</span> <span class="p">(</span><span class="n">quantmod</span><span class="o">::</span><span class="nf">Delt</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="n">cpi</span><span class="p">[</span><span class="m">24</span><span class="p">],</span> <span class="n">new_cpis</span><span class="p">),</span> <span class="n">k</span> <span class="o">=</span> <span class="m">1</span><span class="p">)</span> <span class="o">*</span> <span class="m">100</span><span class="p">)</span> <span class="o">%&gt;%</span> <span class="nf">na.omit</span><span class="p">()</span> <span class="o">%&gt;%</span> <span class="nf">as.numeric</span><span class="p">()</span>
+<span class="n">cpis_yy</span> <span class="o">&lt;-</span> <span class="p">(</span><span class="n">quantmod</span><span class="o">::</span><span class="nf">Delt</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="n">cpi</span><span class="p">,</span> <span class="n">new_cpis</span><span class="p">),</span> <span class="n">k</span> <span class="o">=</span> <span class="m">12</span><span class="p">)</span> <span class="o">*</span> <span class="m">100</span><span class="p">)</span> <span class="o">%&gt;%</span> <span class="nf">na.omit</span><span class="p">()</span> <span class="o">%&gt;%</span> <span class="nf">as.numeric</span><span class="p">()</span> <span class="o">%&gt;%</span> <span class="nf">tail</span><span class="p">(</span><span class="n">hor</span><span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="n">cpis_mm</span><span class="p">)</span>
+<span class="p">[</span><span class="m">1</span><span class="p">]</span>   <span class="m">0.4778866</span>  <span class="m">62.0491047</span> <span class="m">121.6319997</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="n">cpis_yy</span><span class="p">)</span>
+<span class="p">[</span><span class="m">1</span><span class="p">]</span>   <span class="m">7.569631</span>  <span class="m">73.209330</span> <span class="m">281.442012</span>
+</pre></div>
+</div>
 </section>
 </section>
 </section>

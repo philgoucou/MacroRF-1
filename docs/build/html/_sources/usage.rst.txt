@@ -40,14 +40,28 @@ We can take a look at this data before we proceed:
      2     2.537384  1.329799    1.269387    0.659181 ...   0.428252    1.484950    3 
      3     1.769591  1.272429    0.593841    0.459622 ...   1.118214   -1.597299    4 
      4     2.299628  0.414641    0.775634    1.616626 ...   -0.739658   0.374999    5 
+   
+We want to predict sim_y (:math:`y_t`) using all variables in our data set (:math:`S_t`), but we only want to include the first 3 variables (:math:`X_t`) in the linear equation to get time-varying parameters.
+
+.. code-block:: python
+
+   ### Dependent Variable
+   my_var = "sim_y"
+   y_pos = simulated_data.columns.get_loc(my_var)
+
+   ### Exogenous Variables
+   S_vars = [f"sim_x{i}" for i in range(1, 16)] + ['trend']
+   S_pos = [simulated_data.columns.get_loc(s) for s in S_vars]
+
+   ### Variables Included in Linear Equation
+   x_vars = ["sim_x1", 'sim_x2', 'sim_x3']
+   x_pos = [simulated_data.columns.get_loc(x) for x in x_vars]
 
 Let's say we want to predict the last 50 observations. We can set up our oos_pos as follows:
 
 .. code-block:: python
 
    oos_pos = np.arange(len(simulated_data) - 50 , len(simulated_data)) # lower should be oos start, upper the length of your dataset
-
-Notice that our desired :math:`y_t` is in column position 0, so we will pass :code:`y_pos = 0`. Our desired :math:`X_t` are in index positions 1, 2 and 3, since we want our first 3 predictors to be time-varying, so we will pass :code:`x_pos = np.arange(1, 4)`. S_pos we will omit from our arguments, since we want all of our extra exogenous variables to be included in our overall predictor set.
 
 If we want to speed things up, we can also select :code:`parallelise = True` and :code:`n_cores = 3` to run the code across 3 cores on our machine. 
 
@@ -61,8 +75,9 @@ Now we are ready to implement:
 .. code-block:: python
 
    MRF = MacroRandomForest(data = simulated_data,
-                           y_pos = 0,
-                           x_pos = np.arange(1,4), 
+                           y_pos = y_pos,
+                           x_pos = x_pos,
+                           S_pos = S_pos, 
                            B = 100, 
                            parallelise = True,
                            n_cores = 3,
@@ -113,10 +128,12 @@ And, last but not least, the GTVPs:
 
    MRF.band_plots()
 
-.. image:: /images/GTVPs.png
+.. image:: /images/sim_bands.png
 
 Implementation Example: One-Step Macro Forecasting
 +++++++++++++++++++++++++++
+
+Let's say that our goal is to forecast non-farm payrolls one period ahead using the principal components (factors) of the FRED macroeconomic database (FREDMD).
 
 First order of business is to import MRF, seaborn (a useful plotting package) and numPy (for numerical calculations):
 
@@ -126,9 +143,7 @@ First order of business is to import MRF, seaborn (a useful plotting package) an
    import seaborn as sns
    import numpy as np
 
-Let's say that our goal is to forecast non-farm payrolls one period ahead using the principal components (factors) of the FRED macroeconomic data base (FREDMD).
-
-To download the data set, we simply need to scrape it from a Google Drive link as follows:
+To download the FREDMD data set, we simply need to scrape it from a Google Drive link as follows:
 
 .. code-block:: python
 
@@ -200,7 +215,7 @@ That's it! Our models are fit and the training is finished. All we need to do no
 
    print(pred)
 
-   0.0036527161575421736
+   0.0036531595778754606
 
 This gives us our predicted log-difference. Now we have to convert that back to the original units:
 
@@ -210,9 +225,9 @@ This gives us our predicted log-difference. Now we have to convert that back to 
 
    print(y)
 
-   547.551682547529
+   547.6182739258802
 
-And there we have it, our final forecasted value is 542.5337569539552. If we want, we can also access the pre-ensembled forecasts:
+And there we have it, our final forecasted value is 547.6182739258802. If we want, we can also access the pre-ensembled forecasts:
 
 .. code-block:: python
 
@@ -236,6 +251,77 @@ Let’s visualise the range of our pre-ensembled forecasts by plotting the distr
    ax.legend(fontsize = 16)
 
 .. image:: /images/Python_nfpr.png
+
+We can also look at the GTVPs to visualise the change in the coefficients corresponding to the constant (:math:`\beta_0`, top-left), the lagged dependent variable (:math:`\beta_1`, top-right) and the rest of the principal components corresponding to our chosen :math:`X_t`.
+
+.. image:: /images/Python_nfpr_GTVPs_2.png
+
+Implementation Example: Multi-Step Macro Forecasting
++++++++++++++++++++++++++++
+
+Let's say that our goal is to forecast inflation (CPI) three periods ahead using the principal components (factors) of the FRED macroeconomic database (FREDMD).
+
+Firstly, we will need to load MRF.
+
+.. code-block:: python
+
+   from MRF import *
+
+To download our FREDMD data set, we simply need to scrape it from a Google Drive link as follows:
+
+.. code-block:: python
+
+   url='https://drive.google.com/file/d/1AG7oUfG03wH6-OPFm0sxdsAcutt2jdbn/view?usp=sharing'
+   url='https://drive.google.com/uc?id=' + url.split('/')[-2]
+   df = pd.read_csv(url, index_col = "Unnamed: 0").reset_index(drop = True)
+
+We can take a look at this dataset before we proceed:
+
+.. code-block:: python
+
+   index  CPIAUCSL    F_1       F_2       F_3       F_4       F_5       MAF_1    MAF_2      MAF_3    Trend 
+
+   0      0.002158  1.173100  0.172975 -3.420704 -1.360721 -2.099334 -4.068628  4.708296 -13.407287      1 
+   1      0.001604  2.049119  0.785785 -3.070974 -0.773570 -1.854451 -4.226717  3.971370 -13.633706      2 
+   2     -0.002159  1.074777 -2.870071 -0.030658 -0.757934 -2.659571 -5.273620  3.157967 -12.326495      3 
+   3     -0.000005  1.588660 -2.648067 -1.283088  0.118267 -1.761513 -6.650085  2.691071 -10.964577      4 
+   4     -0.000538  1.728049 -3.852286 -1.425368 -4.038225 -0.612198 -8.065427  1.639973 -10.627529      5 
+
+Our goal is to forecast CPI, so we'll set that as our dependent variable. As predictors, we're going to have 5 factors (principal components) of the FREDMD database with the first three (our :math:`X_t`) included in our linear equation, all at a lag of three periods. Our data is going to start on Jan 1st 2003 and we're going to make predictions on a three-period forecast horizon:
+
+.. code-block:: python
+
+   ### Variable from FRED
+   my_var = "CPIAUCSL"
+   y_pos = df.columns.get_loc(my_var)
+
+   ### Number of factors
+   my_k = 5
+
+   ### First number of factors in linear eqn
+   my_x = 3
+
+   ### Lags
+   my_p = 3
+
+   ### Start Date
+   start_date = "2003-01-01"
+
+   ### Forecast Horizon
+   hor = 3
+
+We're going to want to save our forest output as we loop through to the eventual forecast horizon, so we'll create an array where the output can be stored. We can also set the seed for replicability:
+
+.. code-block:: r
+
+   r_list = []
+   np.random.seed(1234)
+
+And with all of that out of the way, it's time to fit MRF! We're going to conduct recursive forecasting by looping through from 1 until the eventual forecast horizon, each time setting our data matrix and the position of our variables that we want to be time-varying:
+
+.. code-block:: python
+
+
 
 Implementation Example: Financial Trading
 +++++++++++++++++++++++++++
@@ -354,7 +440,7 @@ Let’s say we want to predict the last 50 observations. We can set up our oos_p
 
    oos_position = nrow(data.in)-50: nrow(data.in)
 
-Once we have made our data set, we are ready to run MRF. We need to specify the position of our desired :math:`y_t`. In our case, this variable is in the first column, so we will set :code:`y.pos = 1`. Our desired :math:`X_t` are in index positions 1, 2 and 3, since we want our first 3 predictors to be time-varying, so we will pass :code:`x.pos = 2:4`. S_pos we will pass as :code:`s.pos = 2:ncol(data.in)`, since we want all of our extra exogenous variables to be included in our overall predictor set :math:`S_t`. 
+Once we have made our data set, we are ready to run MRF. We need to specify the position of our desired :math:`y_t`. In our case, this variable is in the first column, so we will set :code:`y.pos = 1`. Our desired :math:`X_t` are in index positions 1, 2 and 3, since we want our first 3 predictors to be time-varying, so we will pass :code:`x.pos = 2:4`. S_pos we will pass as :code:`S.pos = 2:ncol(data.in)`, since we want all of our extra exogenous variables to be included in our overall predictor set :math:`S_t`. 
 
 The remaining hyperparameters we have chosen are relatively standard and the user should see :ref:`Docs <docs>` if they want to know more details.
 
@@ -378,7 +464,7 @@ And we're done. You now have MRF predictions and GTVPs! Here's a look at our out
 Implementation Example: One-Step Macro Forecasting
 +++++++++++++++++++++++++++
 
-Let's say that our goal is to forecast non-farm payrolls one period ahead using the FRED macroeconomic data base (FREDMD).
+Let's say that our goal is to forecast non-farm payrolls one period ahead using the FRED macroeconomic database (FREDMD).
 
 Let's firstly load MRF. We will also load the fbi package, which let's us read and manipulate FRED data, and several other useful libraries. 
 
@@ -399,7 +485,7 @@ We are also going to initialise the select method, which comes from the dplyr pa
 
 With the boring stuff out of the way, let's go about creating our forecasting setup. 
    
-Our goal is to forecast non-farm payrolls, so we'll set that as our dependent variable. As predictors, we're going to have 5 factors of the FREDMD data base with the first three (our :math:`X_t`) included in our linear equation, all at a lag of one. Our data is going to start on Jan 1st 2003 and we're going to make predictions on a one-period forecast horizon:
+Our goal is to forecast non-farm payrolls, so we'll set that as our dependent variable. As predictors, we're going to have 5 factors of the FREDMD database with the first three (our :math:`X_t`) included in our linear equation, all at a lag of one. Our data is going to start on Jan 1st 2003 and we're going to make predictions on a one-period forecast horizon:
 
 .. code-block:: r
 
@@ -618,7 +704,7 @@ We can also look at the GTVPs to visualise the change in the coefficients corres
 Implementation Example: Multi-Step Macro Forecasting
 +++++++++++++++++++++++++++
 
-Let's say that our goal is to forecast inflation (CPI) three periods ahead using the FRED macroeconomic data base (FREDMD).
+Let's say that our goal is to forecast inflation (CPI) three periods ahead using the FRED macroeconomic database (FREDMD).
 
 Firstly, we will need to load MRF. We will also load the fbi package, which let's us read and manipulate FRED data, and several other useful libraries.
 
@@ -631,7 +717,7 @@ Firstly, we will need to load MRF. We will also load the fbi package, which let'
    library(vars)
 
 
-Our goal is to forecast CPI, so we'll set that as our dependent variable. As predictors, we're going to have 5 factors (principal components) of the FREDMD data base with the first three (our :math:`X_t`) included in our linear equation, all at a lag of three periods. Our data is going to start on Jan 1st 2003 and we're going to make predictions on a three-period forecast horizon:
+Our goal is to forecast CPI, so we'll set that as our dependent variable. As predictors, we're going to have 5 factors (principal components) of the FREDMD database with the first three (our :math:`X_t`) included in our linear equation, all at a lag of three periods. Our data is going to start on Jan 1st 2003 and we're going to make predictions on a three-period forecast horizon:
 
 .. code-block:: r
 
@@ -810,4 +896,25 @@ That's it! Our models are fit and the training is finished. All we need to do no
    print(preds)
    [1] -0.00156105  0.52877814  0.79409874
 
-Now we have our three-step predictions for the log-difference. All that's left to do is to convert that back to the original CPI units.
+Now we have our three-step predictions for the log-difference. All that's left to do is to convert that back to the original CPI units:
+
+.. code-block:: r
+
+   cpi <- c(259.007,258.165,256.094,255.944,257.217,258.543,259.580,260.190,260.352,260.721,261.564,262.200,263.346,265.028,266.727,
+   268.599,270.955,272.184,273.092,274.214,276.590,278.524,280.126,281.933)
+
+   last_log_diff <- log(cpi[24]) - log(cpi[23])
+   new_log_diff <- last_log_diff + preds
+
+   new_log_diff
+   new_cpis <- cpi[24] * cumprod(exp(new_log_diff))
+
+   cpis_mm <- (quantmod::Delt(c(cpi[24], new_cpis), k = 1) * 100) %>% na.omit() %>% as.numeric()
+   cpis_yy <- (quantmod::Delt(c(cpi, new_cpis), k = 12) * 100) %>% na.omit() %>% as.numeric() %>% tail(hor)
+
+   print(cpis_mm)
+   [1]   0.4778866  62.0491047 121.6319997
+
+   print(cpis_yy)
+   [1]   7.569631  73.209330 281.442012
+
