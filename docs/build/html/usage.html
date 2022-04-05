@@ -45,12 +45,13 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#python">Python</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#implementation-example-simple-one-step-forecasting">Implementation Example: Simple One-Step Forecasting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#implementation-example-one-step-macro-forecasting">Implementation Example: One-Step Macro Forecasting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#implementation-example-financial-trading">Implementation Example: Financial Trading</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#r">R</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id2">Implementation Example: Simple One-Step Forecasting</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#implementation-example-one-step-macro-forecasting">Implementation Example: One-Step Macro Forecasting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#id3">Implementation Example: One-Step Macro Forecasting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#implementation-example-multi-step-macro-forecasting">Implementation Example: Multi-Step Macro Forecasting</a></li>
 </ul>
 </li>
@@ -98,8 +99,10 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simulated_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;../Datasets/mrf_sim.csv&quot;</span><span class="p">,</span> <span class="n">index_col</span> <span class="o">=</span> <span class="s1">&#39;index&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>We can take a look at this data using <code class="code docutils literal notranslate"><span class="pre">display(simulated_data.head(5))</span></code>:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">index</span>    <span class="n">sim_y</span>     <span class="n">sim_x1</span>      <span class="n">sim_x2</span>      <span class="n">sim_x3</span>  <span class="o">...</span>    <span class="n">sim_x14</span>    <span class="n">sim_x15</span>   <span class="n">trend</span>
+<p>We can take a look at this data before we proceed:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">display</span><span class="p">(</span><span class="n">simulated_data</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+
+<span class="n">index</span>    <span class="n">sim_y</span>     <span class="n">sim_x1</span>      <span class="n">sim_x2</span>      <span class="n">sim_x3</span>  <span class="o">...</span>    <span class="n">sim_x14</span>    <span class="n">sim_x15</span>   <span class="n">trend</span>
   <span class="mi">0</span>    <span class="o">-</span><span class="mf">0.441805</span>  <span class="mf">1.262954</span>   <span class="o">-</span><span class="mf">1.045718</span>   <span class="o">-</span><span class="mf">0.390010</span> <span class="o">...</span>   <span class="mf">0.095309</span>   <span class="o">-</span><span class="mf">0.276508</span>    <span class="mi">1</span>
   <span class="mi">1</span>     <span class="mf">2.793370</span>  <span class="o">-</span><span class="mf">0.326233</span>  <span class="o">-</span><span class="mf">0.896211</span>   <span class="o">-</span><span class="mf">1.819222</span> <span class="o">...</span>   <span class="mf">0.991170</span>   <span class="o">-</span><span class="mf">0.854418</span>    <span class="mi">2</span>
   <span class="mi">2</span>     <span class="mf">2.537384</span>  <span class="mf">1.329799</span>    <span class="mf">1.269387</span>    <span class="mf">0.659181</span> <span class="o">...</span>   <span class="mf">0.428252</span>    <span class="mf">1.484950</span>    <span class="mi">3</span>
@@ -164,6 +167,104 @@
 </pre></div>
 </div>
 <img alt="_images/GTVPs.png" src="_images/GTVPs.png" />
+</section>
+<section id="implementation-example-one-step-macro-forecasting">
+<h3>Implementation Example: One-Step Macro Forecasting<a class="headerlink" href="#implementation-example-one-step-macro-forecasting" title="Permalink to this headline"></a></h3>
+<p>First order of business is to import MRF, seaborn (a useful plotting package) and numPy (for numerical calculations):</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MRF</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+<p>Let’s say that our goal is to forecast non-farm payrolls one period ahead using the principal components (factors) of the FRED macroeconomic data base (FREDMD).</p>
+<p>To download the data set, we simply need to scrape it from a Google Drive link as follows:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">url</span><span class="o">=</span><span class="s1">&#39;https://drive.google.com/file/d/1qYigHu6mygtmxceLTGACV206u7RQsopq/view?usp=sharing&#39;</span>
+<span class="n">url</span><span class="o">=</span><span class="s1">&#39;https://drive.google.com/uc?id=&#39;</span> <span class="o">+</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">index_col</span> <span class="o">=</span> <span class="s2">&quot;Unnamed: 0&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can take a look at this dataset before we proceed:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">display</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">))</span>
+
+<span class="n">index</span>  <span class="n">PAYEMS</span>     <span class="n">PAYEMS</span><span class="o">.</span><span class="n">l1</span>   <span class="n">F_1</span><span class="o">.</span><span class="n">l1</span>     <span class="n">F_2</span><span class="o">.</span><span class="n">l1</span>     <span class="n">F_3</span><span class="o">.</span><span class="n">l1</span>     <span class="n">F_4</span><span class="o">.</span><span class="n">l1</span>     <span class="n">F_5</span><span class="o">.</span><span class="n">l1</span>    <span class="n">MAF_1</span><span class="o">.</span><span class="n">l1</span>    <span class="n">MAF_2</span><span class="o">.</span><span class="n">l1</span>    <span class="n">MAF_3</span><span class="o">.</span><span class="n">l1</span>   <span class="n">trend</span>
+<span class="mi">1</span>     <span class="mf">0.000079</span>    <span class="mf">0.000781</span>  <span class="o">-</span><span class="mf">3.448621</span>  <span class="o">-</span><span class="mf">3.757808</span>   <span class="mf">2.135087</span>   <span class="mf">6.158099</span>  <span class="o">-</span><span class="mf">0.756587</span>  <span class="o">-</span><span class="mf">24.430689</span>   <span class="mf">23.652427</span>  <span class="o">-</span><span class="mf">11.180313</span>    <span class="mi">1</span>
+<span class="mi">2</span>    <span class="o">-</span><span class="mf">0.000571</span>    <span class="mf">0.000079</span>  <span class="o">-</span><span class="mf">2.437831</span>   <span class="mf">1.538254</span>  <span class="o">-</span><span class="mf">1.779137</span>   <span class="mf">9.956491</span>  <span class="o">-</span><span class="mf">0.705905</span>  <span class="o">-</span><span class="mf">25.743333</span>   <span class="mf">23.104332</span>  <span class="o">-</span><span class="mf">11.575205</span>    <span class="mi">2</span>
+<span class="mi">3</span>    <span class="o">-</span><span class="mf">0.000354</span>   <span class="o">-</span><span class="mf">0.000571</span>  <span class="o">-</span><span class="mf">5.140423</span>   <span class="mf">0.261719</span>  <span class="o">-</span><span class="mf">1.144619</span>   <span class="mf">7.897809</span>  <span class="o">-</span><span class="mf">0.525376</span>  <span class="o">-</span><span class="mf">27.532826</span>   <span class="mf">22.534573</span>  <span class="o">-</span><span class="mf">12.688364</span>    <span class="mi">3</span>
+<span class="mi">4</span>    <span class="o">-</span><span class="mf">0.001737</span>   <span class="o">-</span><span class="mf">0.000354</span>  <span class="o">-</span><span class="mf">4.333899</span>   <span class="mf">3.133827</span>  <span class="o">-</span><span class="mf">1.938026</span>   <span class="mf">8.523099</span>  <span class="o">-</span><span class="mf">0.204046</span>  <span class="o">-</span><span class="mf">29.392758</span>   <span class="mf">21.758538</span>  <span class="o">-</span><span class="mf">13.359394</span>    <span class="mi">4</span>
+<span class="mi">5</span>    <span class="o">-</span><span class="mf">0.001283</span>   <span class="o">-</span><span class="mf">0.001737</span>  <span class="o">-</span><span class="mf">4.135100</span>   <span class="mf">0.606762</span>  <span class="o">-</span><span class="mf">0.008077</span>  <span class="o">-</span><span class="mf">0.908704</span>  <span class="o">-</span><span class="mf">1.573666</span>  <span class="o">-</span><span class="mf">31.232862</span>   <span class="mf">21.071040</span>  <span class="o">-</span><span class="mf">14.412521</span>    <span class="mi">5</span>
+</pre></div>
+</div>
+<p>We can now go about defining our forecasting setup. Our goal is to forecast non-farm payrolls, so we’ll set that as our dependent variable. As predictors, we’re going to have the first three principal factors FA and MAF included in our linear equation all at a lag of one (these will be our <span class="math notranslate nohighlight">\(X_t\)</span>). We’re going to make predictions on a one-period forecast horizon:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">### Dependent Variable</span>
+<span class="n">my_var</span> <span class="o">=</span> <span class="s2">&quot;PAYEMS&quot;</span>
+<span class="n">y_pos</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">get_loc</span><span class="p">(</span><span class="n">my_var</span><span class="p">)</span>
+
+<span class="c1">### Exogenous Variables</span>
+<span class="n">x_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;PAYEMS.l1&quot;</span><span class="p">,</span> <span class="s1">&#39;F_1.l1&#39;</span><span class="p">,</span> <span class="s1">&#39;F_2.l1&#39;</span><span class="p">,</span> <span class="s1">&#39;F_3.l1&#39;</span><span class="p">,</span> <span class="s1">&#39;MAF_1.l1&#39;</span><span class="p">,</span> <span class="s1">&#39;MAF_2.l1&#39;</span><span class="p">,</span> <span class="s1">&#39;MAF_3.l1&#39;</span><span class="p">]</span>
+<span class="n">x_pos</span> <span class="o">=</span> <span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">get_loc</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">x_vars</span><span class="p">]</span>
+
+<span class="c1">### Forecast Horizon</span>
+<span class="n">hor</span> <span class="o">=</span> <span class="mi">1</span>
+</pre></div>
+</div>
+<p>We’re going to set our out-of-sample position to be only the last value, since we are only interested in predicting the next value for non-farm payrolls.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">oos_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>Now we’re ready to fit MRF! We’re going to pass in the <code class="code docutils literal notranslate"><span class="pre">y_pos</span></code> and <code class="code docutils literal notranslate"><span class="pre">x_pos</span></code> we defined above. We are using <code class="code docutils literal notranslate"><span class="pre">ridge_lambda</span> <span class="pre">=</span> <span class="pre">0.3</span></code> as our ridge regularisation <span class="math notranslate nohighlight">\(\lambda\)</span>. We are going to set <code class="code docutils literal notranslate"><span class="pre">parallelise</span> <span class="pre">=</span> <span class="pre">True</span></code> and <code class="code docutils literal notranslate"><span class="pre">n_cores</span> <span class="pre">=</span> <span class="pre">-1</span></code> to run MRF across all cores on our machine in parallel.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">MRF</span> <span class="o">=</span> <span class="n">MacroRandomForest</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
+                        <span class="n">y_pos</span> <span class="o">=</span> <span class="n">y_pos</span><span class="p">,</span>
+                        <span class="n">x_pos</span> <span class="o">=</span> <span class="n">x_pos</span><span class="p">,</span>
+                        <span class="n">B</span> <span class="o">=</span> <span class="mi">250</span><span class="p">,</span>
+                        <span class="n">ridge_lambda</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+                        <span class="n">parallelise</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                        <span class="n">n_cores</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="n">oos_pos</span> <span class="o">=</span> <span class="n">oos_pos</span><span class="p">,</span>
+                        <span class="n">trend_push</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span>
+                        <span class="n">quantile_rate</span> <span class="o">=</span> <span class="mf">0.3</span><span class="p">,</span>
+                        <span class="n">fast_rw</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Now to fit MRF we just need to run:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mrf_output</span> <span class="o">=</span> <span class="n">MRF</span><span class="o">.</span><span class="n">_ensemble_loop</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>That’s it! Our models are fit and the training is finished. All we need to do now is to access our prediction.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pred</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">MRF_output</span><span class="p">[</span><span class="s1">&#39;pred&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span>
+
+<span class="mf">0.0036527161575421736</span>
+</pre></div>
+</div>
+<p>This gives us our predicted log-difference. Now we have to convert that back to the original units:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">y</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="mi">149629</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cumprod</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">pred</span><span class="p">))</span> <span class="o">-</span> <span class="mi">149629</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+
+<span class="mf">547.551682547529</span>
+</pre></div>
+</div>
+<p>And there we have it, our final forecasted value is 542.5337569539552. If we want, we can also access the pre-ensembled forecasts:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">=</span> <span class="p">[</span><span class="mi">149629</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">))</span> <span class="o">-</span> <span class="mi">149629</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">MRF_output</span><span class="p">[</span><span class="s1">&#39;pred_ensemble&#39;</span><span class="p">]]</span>
+</pre></div>
+</div>
+<p>Let’s visualise the range of our pre-ensembled forecasts by plotting the distribution:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
+<span class="n">sns</span><span class="o">.</span><span class="n">kdeplot</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">ax</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;grey&#39;</span><span class="p">,</span> <span class="n">shade</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">set_size_inches</span><span class="p">([</span><span class="mi">16</span><span class="p">,</span> <span class="mi">9</span><span class="p">])</span>
+
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Forecast&quot;</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">16</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Density&quot;</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">16</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1000</span><span class="p">])</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;MRF Median&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">423</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;Consensus&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">678</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s2">&quot;First Release&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s2">&quot;Distribution (density) of pre-ensembled forecasts&quot;</span><span class="p">,</span> <span class="n">fontsize</span> <span class="o">=</span> <span class="mi">16</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">fontsize</span> <span class="o">=</span> <span class="mi">16</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="_images/Python_nfpr.png" src="_images/Python_nfpr.png" />
 </section>
 <section id="implementation-example-financial-trading">
 <h3>Implementation Example: Financial Trading<a class="headerlink" href="#implementation-example-financial-trading" title="Permalink to this headline"></a></h3>
@@ -271,8 +372,8 @@
 </div>
 <p>And we’re done. You now have MRF predictions and GTVPs! Here’s a look at our output:</p>
 <img alt="_images/R_GTVPs.svg" src="_images/R_GTVPs.svg" /></section>
-<section id="implementation-example-one-step-macro-forecasting">
-<h3>Implementation Example: One-Step Macro Forecasting<a class="headerlink" href="#implementation-example-one-step-macro-forecasting" title="Permalink to this headline"></a></h3>
+<section id="id3">
+<h3>Implementation Example: One-Step Macro Forecasting<a class="headerlink" href="#id3" title="Permalink to this headline"></a></h3>
 <p>Let’s say that our goal is to forecast non-farm payrolls one period ahead using the FRED macroeconomic data base (FREDMD).</p>
 <p>Let’s firstly load MRF. We will also load the fbi package, which let’s us read and manipulate FRED data, and several other useful libraries.</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">MacroRF</span><span class="p">)</span>
@@ -389,18 +490,33 @@
 <span class="m">65</span> <span class="m">-0.0012831063</span>  <span class="m">-1.806275</span>   <span class="m">3.6440667</span>  <span class="m">-2.393721847</span>  <span class="m">-3.3302690</span>  <span class="m">-0.02333614</span>  <span class="m">-32.65311</span>  <span class="m">20.01826</span>  <span class="m">-14.79434</span>
 </pre></div>
 </div>
-<p>And with all of that out of the way, it’s time to fit MRF! We’re going to loop through from 1 until the eventual forecast horizon, each time setting our data matrix and the position of our variables that we want to be time-varying.</p>
+<p>Since we’re doing regression, we need lag our variables by 1 (our chosen lag):</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">Y_temp</span> <span class="o">&lt;-</span> <span class="n">Y</span><span class="p">[</span><span class="nf">c</span><span class="p">(</span><span class="m">1</span><span class="o">:</span><span class="nf">nrow</span><span class="p">(</span><span class="n">Y</span><span class="p">),</span> <span class="nf">nrow</span><span class="p">(</span><span class="n">Y</span><span class="p">)),</span> <span class="p">]</span>
 
-<span class="n">mat</span> <span class="o">&lt;-</span> <span class="nf">VAR</span><span class="p">(</span><span class="n">Y_temp</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">my_p</span> <span class="o">-</span> <span class="m">1</span><span class="p">,</span> <span class="n">type</span> <span class="o">=</span> <span class="s">&quot;trend&quot;</span><span class="p">)[[</span><span class="s">&quot;datamat&quot;</span><span class="p">]]</span> <span class="o">%&gt;%</span>
+<span class="n">mat</span> <span class="o">&lt;-</span> <span class="nf">VAR</span><span class="p">(</span><span class="n">Y_temp</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">my_p</span><span class="p">,</span> <span class="n">type</span> <span class="o">=</span> <span class="s">&quot;trend&quot;</span><span class="p">)[[</span><span class="s">&quot;datamat&quot;</span><span class="p">]]</span> <span class="o">%&gt;%</span>
    <span class="nf">as.data.frame</span><span class="p">()</span> <span class="o">%&gt;%</span>
-   <span class="nf">select</span><span class="p">(</span><span class="n">my_var</span><span class="p">,</span> <span class="nf">contains</span><span class="p">(</span><span class="s">&quot;.l&quot;</span><span class="p">),</span> <span class="n">trend</span><span class="p">)</span>
+   <span class="nf">select</span><span class="p">(</span><span class="n">my_var</span><span class="p">,</span> <span class="nf">contains</span><span class="p">(</span><span class="s">&quot;.l&quot;</span><span class="p">),</span> <span class="n">trend</span><span class="p">)</span> <span class="c1"># accessing the data model of VAR (lags our variables 1)</span>
 
 <span class="nf">rownames</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span> <span class="o">&lt;-</span> <span class="kc">NULL</span>
 
-<span class="n">x_pos1</span> <span class="o">&lt;-</span> <span class="nf">which</span><span class="p">(</span><span class="nf">str_detect</span><span class="p">(</span><span class="nf">colnames</span><span class="p">(</span><span class="n">mat</span><span class="p">),</span> <span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;F_&quot;</span><span class="p">,</span> <span class="m">1</span><span class="o">:</span><span class="n">my_x</span><span class="p">,</span> <span class="s">&quot;.l&quot;</span><span class="p">,</span> <span class="nf">rep</span><span class="p">(</span><span class="m">1</span><span class="o">:</span><span class="n">my_p</span><span class="p">,</span> <span class="n">each</span> <span class="o">=</span> <span class="n">my_x</span><span class="p">),</span> <span class="n">collapse</span> <span class="o">=</span> <span class="s">&quot;|&quot;</span><span class="p">)))</span>
-<span class="n">x_pos2</span> <span class="o">&lt;-</span> <span class="nf">which</span><span class="p">(</span><span class="nf">str_detect</span><span class="p">(</span><span class="nf">colnames</span><span class="p">(</span><span class="n">mat</span><span class="p">),</span> <span class="nf">paste0</span><span class="p">(</span><span class="n">my_var</span><span class="p">,</span> <span class="s">&quot;.l&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">collapse</span> <span class="o">=</span> <span class="s">&quot;|&quot;</span><span class="p">)))</span>
-<span class="n">x_pos</span> <span class="o">=</span> <span class="nf">c</span><span class="p">(</span><span class="n">x_pos1</span><span class="p">,</span> <span class="n">x_pos2</span><span class="p">)</span>
+<span class="n">mat</span><span class="p">[</span><span class="s">&#39;trend&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="m">1</span><span class="o">:</span> <span class="nf">nrow</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Thus our final input data is as follows:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span>         <span class="n">PAYEMS</span>     <span class="n">PAYEMS.l1</span>    <span class="n">F_1.l1</span>     <span class="n">F_2.l1</span>       <span class="n">F_3.l1</span>    <span class="n">F_4.l1</span>      <span class="n">F_5.l1</span>    <span class="n">MAF_1.l1</span>  <span class="n">MAF_2.l1</span>   <span class="n">MAF_3.l1</span>  <span class="n">trend</span>
+<span class="m">1</span>  <span class="m">0.0000794812</span>  <span class="m">0.0007806966</span> <span class="m">-3.448621</span> <span class="m">-3.7578079</span>  <span class="m">2.135086615</span>  <span class="m">6.1580987</span>  <span class="m">-0.75658675</span> <span class="m">-24.43069</span>  <span class="m">23.65243</span>  <span class="m">-11.18031</span>    <span class="m">1</span>
+<span class="m">2</span> <span class="m">-0.0005709598</span>  <span class="m">0.0000794812</span> <span class="m">-2.437831</span>  <span class="m">1.5382544</span> <span class="m">-1.779136678</span>  <span class="m">9.9564912</span>  <span class="m">-0.70590524</span> <span class="m">-25.74333</span>  <span class="m">23.10433</span>  <span class="m">-11.57520</span>    <span class="m">2</span>
+<span class="m">3</span> <span class="m">-0.0003543035</span> <span class="m">-0.0005709598</span> <span class="m">-5.140423</span>  <span class="m">0.2617188</span> <span class="m">-1.144619273</span>  <span class="m">7.8978095</span>  <span class="m">-0.52537640</span> <span class="m">-27.53283</span>  <span class="m">22.53457</span>  <span class="m">-12.68836</span>    <span class="m">3</span>
+<span class="m">4</span> <span class="m">-0.0017371797</span> <span class="m">-0.0003543035</span> <span class="m">-4.333899</span>  <span class="m">3.1338272</span> <span class="m">-1.938025976</span>  <span class="m">8.5230994</span>  <span class="m">-0.20404637</span> <span class="m">-29.39276</span>  <span class="m">21.75854</span>  <span class="m">-13.35939</span>    <span class="m">4</span>
+<span class="m">5</span> <span class="m">-0.0012831063</span> <span class="m">-0.0017371797</span> <span class="m">-4.135100</span>  <span class="m">0.6067619</span> <span class="m">-0.008076702</span> <span class="m">-0.9087045</span>  <span class="m">-1.57366593</span> <span class="m">-31.23286</span>  <span class="m">21.07104</span>  <span class="m">-14.41252</span>    <span class="m">5</span>
+<span class="m">6</span> <span class="m">-0.0012411767</span> <span class="m">-0.0012831063</span> <span class="m">-1.806275</span>  <span class="m">3.6440667</span> <span class="m">-2.393721847</span> <span class="m">-3.3302690</span>  <span class="m">-0.02333614</span> <span class="m">-32.65311</span>  <span class="m">20.01826</span>  <span class="m">-14.79434</span>    <span class="m">6</span>
+</pre></div>
+</div>
+<p>Next we need to choose which variables we want to include in our linear equation (to generate GTVPs). Here, we’re going to choose <span class="math notranslate nohighlight">\(X_t\)</span> to include the lag of the dependent variable and the lag on the first 3 factors (F and MAF):</p>
+<p>And with all of that out of the way, it’s time to fit MRF!</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">x_pos1</span> <span class="o">&lt;-</span> <span class="nf">which</span><span class="p">(</span><span class="nf">str_detect</span><span class="p">(</span><span class="nf">colnames</span><span class="p">(</span><span class="n">mat</span><span class="p">),</span> <span class="nf">paste0</span><span class="p">(</span><span class="n">my_var</span><span class="p">,</span> <span class="s">&quot;.l&quot;</span><span class="p">,</span> <span class="n">my_p</span><span class="p">,</span> <span class="n">collapse</span> <span class="o">=</span> <span class="s">&quot;|&quot;</span><span class="p">)))</span> <span class="c1"># lag on the dependent variable</span>
+<span class="n">x_pos2</span> <span class="o">&lt;-</span> <span class="nf">which</span><span class="p">(</span><span class="nf">str_detect</span><span class="p">(</span><span class="nf">colnames</span><span class="p">(</span><span class="n">mat</span><span class="p">),</span> <span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;F_&quot;</span><span class="p">,</span> <span class="m">1</span><span class="o">:</span><span class="n">my_x</span><span class="p">,</span> <span class="s">&quot;.l&quot;</span><span class="p">,</span> <span class="nf">rep</span><span class="p">(</span><span class="m">1</span><span class="o">:</span><span class="n">my_p</span><span class="p">,</span> <span class="n">each</span> <span class="o">=</span> <span class="n">my_x</span><span class="p">),</span> <span class="n">collapse</span> <span class="o">=</span> <span class="s">&quot;|&quot;</span><span class="p">)))</span> <span class="c1"># lag on the factors</span>
+<span class="n">x_pos</span> <span class="o">=</span> <span class="nf">c</span><span class="p">(</span><span class="n">x_pos1</span><span class="p">,</span> <span class="n">x_pos2</span><span class="p">)</span> <span class="c1"># combine them</span>
 
 <span class="n">model</span> <span class="o">&lt;-</span> <span class="nf">MRF</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">x.pos</span> <span class="o">=</span> <span class="n">x_pos</span><span class="p">,</span>
                   <span class="n">oos.pos</span> <span class="o">=</span> <span class="nf">nrow</span><span class="p">(</span><span class="n">mat</span><span class="p">),</span>
@@ -414,14 +530,20 @@
 <p>That’s it! Our models are fit and the training is finished. All we need to do now is to access our predictions.</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">preds</span> <span class="o">&lt;-</span> <span class="n">model</span><span class="p">[[</span><span class="s">&quot;pred&quot;</span><span class="p">]]</span>
 
-<span class="n">y</span> <span class="o">&lt;-</span> <span class="m">149629</span> <span class="o">*</span> <span class="nf">cumprod</span><span class="p">(</span><span class="nf">exp</span><span class="p">(</span><span class="n">preds</span><span class="p">))</span> <span class="o">-</span> <span class="m">149629</span> <span class="c1"># Our final forecast!</span>
+<span class="nf">print</span><span class="p">(</span><span class="n">preds</span><span class="p">)</span>
+
+<span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="m">0.003653136</span>
+</pre></div>
+</div>
+<p>This gives us our predicted log-difference. Now we have to convert that back to the original units:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">y</span> <span class="o">&lt;-</span> <span class="m">149629</span> <span class="o">*</span> <span class="nf">cumprod</span><span class="p">(</span><span class="nf">exp</span><span class="p">(</span><span class="n">preds</span><span class="p">))</span> <span class="o">-</span> <span class="m">149629</span> <span class="c1"># Our final forecast!</span>
 
 <span class="nf">print</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
 
-<span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="m">530.0887</span>
+<span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="m">547.6148</span>
 </pre></div>
 </div>
-<p>And there we have it, our final forecasted value is 530.0887. If we want, we can also access the pre-ensembled forecasts:</p>
+<p>And there we have it, our final forecasted value is 547.6148. If we want, we can also access the pre-ensembled forecasts:</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">&lt;-</span> <span class="m">149629</span> <span class="o">*</span> <span class="nf">exp</span><span class="p">(</span><span class="n">model</span><span class="o">$</span><span class="n">pred.ensemble</span><span class="p">)</span> <span class="o">-</span> <span class="m">149629</span>
 <span class="n">d_df</span> <span class="o">&lt;-</span> <span class="nf">data.frame</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
 </pre></div>
@@ -432,16 +554,22 @@
 <span class="nf">aes</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">d</span><span class="p">)</span> <span class="o">+</span>
 <span class="nf">geom_density</span><span class="p">(</span><span class="n">adjust</span> <span class="o">=</span> <span class="m">2</span><span class="p">,</span><span class="n">fill</span> <span class="o">=</span> <span class="s">&quot;grey&quot;</span><span class="p">)</span> <span class="o">+</span>
 <span class="nf">xlim</span><span class="p">(</span><span class="nf">c</span><span class="p">(</span><span class="m">0</span><span class="p">,</span> <span class="m">1000</span><span class="p">))</span> <span class="o">+</span>
-<span class="nf">geom_vline</span><span class="p">(</span><span class="n">xintercept</span> <span class="o">=</span> <span class="nf">median</span><span class="p">(</span><span class="n">d</span><span class="p">))</span> <span class="o">+</span>
 <span class="nf">theme</span><span class="p">(</span><span class="n">plot.background</span> <span class="o">=</span> <span class="nf">element_rect</span><span class="p">(</span><span class="n">fill</span> <span class="o">=</span> <span class="s">&quot;transparent&quot;</span><span class="p">,</span> <span class="n">colour</span> <span class="o">=</span> <span class="kc">NA</span><span class="p">))</span><span class="o">+</span>
 <span class="nf">ggtitle</span><span class="p">(</span><span class="s">&quot;Distribution (density) of pre-ensembled forecasts&quot;</span><span class="p">)</span> <span class="o">+</span>
 <span class="nf">theme</span><span class="p">(</span><span class="n">plot.title</span> <span class="o">=</span> <span class="nf">element_text</span><span class="p">(</span><span class="n">hjust</span> <span class="o">=</span> <span class="m">0.5</span><span class="p">))</span> <span class="o">+</span>
-<span class="nf">xlab</span><span class="p">(</span><span class="s">&quot;Forecast&quot;</span><span class="p">)</span>
+
+<span class="nf">geom_vline</span><span class="p">(</span><span class="nf">aes</span><span class="p">(</span><span class="n">xintercept</span> <span class="o">=</span> <span class="m">423</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s">&#39;Consensus&#39;</span><span class="p">))</span><span class="o">+</span>
+<span class="nf">geom_vline</span><span class="p">(</span><span class="nf">aes</span><span class="p">(</span><span class="n">xintercept</span> <span class="o">=</span> <span class="m">678</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s">&#39;First Release&#39;</span><span class="p">))</span> <span class="o">+</span>
+<span class="nf">geom_vline</span><span class="p">(</span><span class="nf">aes</span><span class="p">(</span><span class="n">xintercept</span> <span class="o">=</span> <span class="nf">median</span><span class="p">(</span><span class="n">d</span><span class="p">),</span> <span class="n">color</span> <span class="o">=</span> <span class="s">&#39;MRF Median&#39;</span><span class="p">))</span><span class="o">+</span>
+
+<span class="nf">labs</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="s">&quot;Forecast&quot;</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="s">&#39;Density&#39;</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span><span class="s">&quot;Legend&quot;</span><span class="p">)</span> <span class="o">+</span>
+<span class="nf">scale_color_manual</span><span class="p">(</span><span class="n">values</span> <span class="o">=</span> <span class="n">colors</span><span class="p">)</span> <span class="o">+</span>
+<span class="nf">theme</span><span class="p">(</span><span class="n">legend.position</span><span class="o">=</span><span class="s">&quot;bottom&quot;</span><span class="p">,</span> <span class="n">legend.box.background</span> <span class="o">=</span> <span class="nf">element_rect</span><span class="p">(</span><span class="n">colour</span> <span class="o">=</span> <span class="s">&quot;black&quot;</span><span class="p">))</span>
 </pre></div>
 </div>
 <img alt="_images/distplot.png" src="_images/distplot.png" />
-<p>We can also look at the GTVPs to visualise the change in the coefficients corresponding to the constant (<span class="math notranslate nohighlight">\(\beta_0\)</span>, top-left), the first principal component (<span class="math notranslate nohighlight">\(\beta_1\)</span>, top-right), second principal component (<span class="math notranslate nohighlight">\(\beta_2\)</span>, bottom-left) and the third principal component (<span class="math notranslate nohighlight">\(\beta_3\)</span>, bottom-right).</p>
-<img alt="_images/GTVP_nfp.svg" src="_images/GTVP_nfp.svg" /></section>
+<p>We can also look at the GTVPs to visualise the change in the coefficients corresponding to the constant (<span class="math notranslate nohighlight">\(\beta_0\)</span>, top-left), the lagged dependent variable (<span class="math notranslate nohighlight">\(\beta_1\)</span>, top-right) and the rest of the principal components corresponding to our chosen <span class="math notranslate nohighlight">\(X_t\)</span>.</p>
+<img alt="_images/R_GTVPs_2_3.svg" src="_images/R_GTVPs_2_3.svg" /></section>
 <section id="implementation-example-multi-step-macro-forecasting">
 <h3>Implementation Example: Multi-Step Macro Forecasting<a class="headerlink" href="#implementation-example-multi-step-macro-forecasting" title="Permalink to this headline"></a></h3>
 <p>Let’s say that our goal is to forecast inflation (CPI) three periods ahead using the FRED macroeconomic data base (FREDMD).</p>
@@ -609,7 +737,7 @@
 <span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="m">-0.00156105</span>  <span class="m">0.52877814</span>  <span class="m">0.79409874</span>
 </pre></div>
 </div>
-<p>Now we have our raw three-step predictions. All that’s left to do is to convert that back to the original CPI units.</p>
+<p>Now we have our three-step predictions for the log-difference. All that’s left to do is to convert that back to the original CPI units.</p>
 </section>
 </section>
 </section>

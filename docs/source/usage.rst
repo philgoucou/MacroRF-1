@@ -28,8 +28,11 @@ As a way to get started, we have included a dataset of simulated variables with 
 
    simulated_data = pd.read_csv("../Datasets/mrf_sim.csv", index_col = 'index')
 
-We can take a look at this data using :code:`display(simulated_data.head(5))`::
+We can take a look at this data before we proceed:
 
+.. code-block:: python
+
+   display(simulated_data.head(5))
 
    index    sim_y     sim_x1      sim_x2      sim_x3  ...    sim_x14    sim_x15   trend 
      0    -0.441805  1.262954   -1.045718   -0.390010 ...   0.095309   -0.276508    1 
@@ -112,6 +115,127 @@ And, last but not least, the GTVPs:
 
 .. image:: /images/GTVPs.png
 
+Implementation Example: One-Step Macro Forecasting
++++++++++++++++++++++++++++
+
+First order of business is to import MRF, seaborn (a useful plotting package) and numPy (for numerical calculations):
+
+.. code-block:: python
+
+   from MRF import *
+   import seaborn as sns
+   import numpy as np
+
+Let's say that our goal is to forecast non-farm payrolls one period ahead using the principal components (factors) of the FRED macroeconomic data base (FREDMD).
+
+To download the data set, we simply need to scrape it from a Google Drive link as follows:
+
+.. code-block:: python
+
+   url='https://drive.google.com/file/d/1qYigHu6mygtmxceLTGACV206u7RQsopq/view?usp=sharing'
+   url='https://drive.google.com/uc?id=' + url.split('/')[-2]
+   df = pd.read_csv(url, index_col = "Unnamed: 0").reset_index(drop = True)
+
+We can take a look at this dataset before we proceed:
+
+.. code-block:: python
+
+   display(df.head(5))
+
+   index  PAYEMS     PAYEMS.l1   F_1.l1     F_2.l1     F_3.l1     F_4.l1     F_5.l1    MAF_1.l1    MAF_2.l1    MAF_3.l1   trend
+   1     0.000079    0.000781  -3.448621  -3.757808   2.135087   6.158099  -0.756587  -24.430689   23.652427  -11.180313    1 
+   2    -0.000571    0.000079  -2.437831   1.538254  -1.779137   9.956491  -0.705905  -25.743333   23.104332  -11.575205    2 
+   3    -0.000354   -0.000571  -5.140423   0.261719  -1.144619   7.897809  -0.525376  -27.532826   22.534573  -12.688364    3 
+   4    -0.001737   -0.000354  -4.333899   3.133827  -1.938026   8.523099  -0.204046  -29.392758   21.758538  -13.359394    4
+   5    -0.001283   -0.001737  -4.135100   0.606762  -0.008077  -0.908704  -1.573666  -31.232862   21.071040  -14.412521    5 
+
+We can now go about defining our forecasting setup. Our goal is to forecast non-farm payrolls, so we'll set that as our dependent variable. As predictors, we're going to have the first three principal factors FA and MAF included in our linear equation all at a lag of one (these will be our :math:`X_t`). We're going to make predictions on a one-period forecast horizon:
+
+.. code-block:: python
+
+   ### Dependent Variable
+   my_var = "PAYEMS"
+   y_pos = df.columns.get_loc(my_var)
+
+   ### Exogenous Variables
+   x_vars = ["PAYEMS.l1", 'F_1.l1', 'F_2.l1', 'F_3.l1', 'MAF_1.l1', 'MAF_2.l1', 'MAF_3.l1']
+   x_pos = [df.columns.get_loc(x) for x in x_vars]
+
+   ### Forecast Horizon
+   hor = 1
+
+We're going to set our out-of-sample position to be only the last value, since we are only interested in predicting the next value for non-farm payrolls.
+
+.. code-block:: python
+
+   oos_pos = np.arange(len(df)- 1, len(df))
+
+Now we're ready to fit MRF! We're going to pass in the :code:`y_pos` and :code:`x_pos` we defined above. We are using :code:`ridge_lambda = 0.3` as our ridge regularisation :math:`\lambda`. We are going to set :code:`parallelise = True` and :code:`n_cores = -1` to run MRF across all cores on our machine in parallel.
+
+.. code-block:: python
+
+   MRF = MacroRandomForest(data = df,
+                           y_pos = y_pos,
+                           x_pos = x_pos, 
+                           B = 250, 
+                           ridge_lambda=0.3,
+                           parallelise = True,
+                           n_cores = -1,
+                           oos_pos = oos_pos,
+                           trend_push = 6,
+                           quantile_rate = 0.3, 
+                           fast_rw = True)
+
+Now to fit MRF we just need to run:
+
+.. code-block:: python
+
+   mrf_output = MRF._ensemble_loop()
+
+That's it! Our models are fit and the training is finished. All we need to do now is to access our prediction.
+
+.. code-block:: python
+
+   pred = float(MRF_output['pred'].values)
+
+   print(pred)
+
+   0.0036527161575421736
+
+This gives us our predicted log-difference. Now we have to convert that back to the original units:
+
+.. code-block:: python
+
+   y = float(149629 * np.cumprod(np.exp(pred)) - 149629)
+
+   print(y)
+
+   547.551682547529
+
+And there we have it, our final forecasted value is 542.5337569539552. If we want, we can also access the pre-ensembled forecasts:
+
+.. code-block:: python
+
+   d = [149629 * np.exp(float(value)) - 149629 for value in MRF_output['pred_ensemble']]
+
+Let’s visualise the range of our pre-ensembled forecasts by plotting the distribution:
+
+.. code-block:: python
+
+   fig, ax = plt.subplots()
+   sns.kdeplot(d, ax = ax, color = 'grey', shade = True)
+   fig.set_size_inches([16, 9])
+
+   ax.set_xlabel("Forecast", fontsize = 16)
+   ax.set_ylabel("Density", fontsize = 16)
+   ax.set_xlim([0, 1000])
+   ax.axvline(y, color = 'green', label = "MRF Median")
+   ax.axvline(423, color = 'blue', label = "Consensus")
+   ax.axvline(678, color = 'red', label = "First Release")
+   ax.set_title("Distribution (density) of pre-ensembled forecasts", fontsize = 16)
+   ax.legend(fontsize = 16)
+
+.. image:: /images/Python_nfpr.png
 
 Implementation Example: Financial Trading
 +++++++++++++++++++++++++++
@@ -391,21 +515,42 @@ We can now take a look at our input data:
    65 -0.0012831063  -1.806275   3.6440667  -2.393721847  -3.3302690  -0.02333614  -32.65311  20.01826  -14.79434
 
 
-And with all of that out of the way, it's time to fit MRF! We're going to loop through from 1 until the eventual forecast horizon, each time setting our data matrix and the position of our variables that we want to be time-varying.
+Since we're doing regression, we need lag our variables by 1 (our chosen lag):
 
 .. code-block:: r
 
       Y_temp <- Y[c(1:nrow(Y), nrow(Y)), ]
 
-      mat <- VAR(Y_temp, p = i + my_p - 1, type = "trend")[["datamat"]] %>%
+      mat <- VAR(Y_temp, p = my_p, type = "trend")[["datamat"]] %>%
          as.data.frame() %>%
-         select(my_var, contains(".l"), trend)
+         select(my_var, contains(".l"), trend) # accessing the data model of VAR (lags our variables 1)
 
       rownames(mat) <- NULL
 
-      x_pos1 <- which(str_detect(colnames(mat), paste0("F_", 1:my_x, ".l", rep(1:my_p, each = my_x), collapse = "|")))
-      x_pos2 <- which(str_detect(colnames(mat), paste0(my_var, ".l", i, collapse = "|")))
-      x_pos = c(x_pos1, x_pos2)
+      mat['trend'] = 1: nrow(mat)
+
+Thus our final input data is as follows:
+
+.. code-block:: r
+
+            PAYEMS     PAYEMS.l1    F_1.l1     F_2.l1       F_3.l1    F_4.l1      F_5.l1    MAF_1.l1  MAF_2.l1   MAF_3.l1  trend
+   1  0.0000794812  0.0007806966 -3.448621 -3.7578079  2.135086615  6.1580987  -0.75658675 -24.43069  23.65243  -11.18031    1
+   2 -0.0005709598  0.0000794812 -2.437831  1.5382544 -1.779136678  9.9564912  -0.70590524 -25.74333  23.10433  -11.57520    2
+   3 -0.0003543035 -0.0005709598 -5.140423  0.2617188 -1.144619273  7.8978095  -0.52537640 -27.53283  22.53457  -12.68836    3
+   4 -0.0017371797 -0.0003543035 -4.333899  3.1338272 -1.938025976  8.5230994  -0.20404637 -29.39276  21.75854  -13.35939    4
+   5 -0.0012831063 -0.0017371797 -4.135100  0.6067619 -0.008076702 -0.9087045  -1.57366593 -31.23286  21.07104  -14.41252    5
+   6 -0.0012411767 -0.0012831063 -1.806275  3.6440667 -2.393721847 -3.3302690  -0.02333614 -32.65311  20.01826  -14.79434    6
+
+
+Next we need to choose which variables we want to include in our linear equation (to generate GTVPs). Here, we're going to choose :math:`X_t` to include the lag of the dependent variable and the lag on the first 3 factors (F and MAF):
+
+And with all of that out of the way, it's time to fit MRF! 
+
+.. code-block:: r
+
+      x_pos1 <- which(str_detect(colnames(mat), paste0(my_var, ".l", my_p, collapse = "|"))) # lag on the dependent variable
+      x_pos2 <- which(str_detect(colnames(mat), paste0("F_", 1:my_x, ".l", rep(1:my_p, each = my_x), collapse = "|"))) # lag on the factors
+      x_pos = c(x_pos1, x_pos2) # combine them
 
       model <- MRF(mat, x.pos = x_pos,
                         oos.pos = nrow(mat),
@@ -421,13 +566,21 @@ That's it! Our models are fit and the training is finished. All we need to do no
 
    preds <- model[["pred"]]
 
+   print(preds)
+
+   [1] 0.003653136
+
+This gives us our predicted log-difference. Now we have to convert that back to the original units:
+
+.. code-block:: r
+
    y <- 149629 * cumprod(exp(preds)) - 149629 # Our final forecast!
 
    print(y)
    
-   [1] 530.0887
+   [1] 547.6148
 
-And there we have it, our final forecasted value is 530.0887. If we want, we can also access the pre-ensembled forecasts:
+And there we have it, our final forecasted value is 547.6148. If we want, we can also access the pre-ensembled forecasts:
 
 .. code-block:: r
 
@@ -443,17 +596,23 @@ Let's visualise the range of our pre-ensembled forecasts by plotting the distrib
    aes(x = d) +
    geom_density(adjust = 2,fill = "grey") +
    xlim(c(0, 1000)) +
-   geom_vline(xintercept = median(d)) +
    theme(plot.background = element_rect(fill = "transparent", colour = NA))+
    ggtitle("Distribution (density) of pre-ensembled forecasts") +
    theme(plot.title = element_text(hjust = 0.5)) +
-   xlab("Forecast") 
+
+   geom_vline(aes(xintercept = 423, color = 'Consensus'))+
+   geom_vline(aes(xintercept = 678, color = 'First Release')) +
+   geom_vline(aes(xintercept = median(d), color = 'MRF Median'))+
+
+   labs(x = "Forecast", y = 'Density', color ="Legend") +
+   scale_color_manual(values = colors) +
+   theme(legend.position="bottom", legend.box.background = element_rect(colour = "black"))
 
 .. image:: /images/distplot.png
 
-We can also look at the GTVPs to visualise the change in the coefficients corresponding to the constant (:math:`\beta_0`, top-left), the first principal component (:math:`\beta_1`, top-right), second principal component (:math:`\beta_2`, bottom-left) and the third principal component (:math:`\beta_3`, bottom-right).
+We can also look at the GTVPs to visualise the change in the coefficients corresponding to the constant (:math:`\beta_0`, top-left), the lagged dependent variable (:math:`\beta_1`, top-right) and the rest of the principal components corresponding to our chosen :math:`X_t`.
 
-.. image:: /images/GTVP_nfp.svg
+.. image:: /images/R_GTVPs_2_3.svg
 
 
 Implementation Example: Multi-Step Macro Forecasting
@@ -651,4 +810,4 @@ That's it! Our models are fit and the training is finished. All we need to do no
    print(preds)
    [1] -0.00156105  0.52877814  0.79409874
 
-Now we have our raw three-step predictions. All that's left to do is to convert that back to the original CPI units.
+Now we have our three-step predictions for the log-difference. All that's left to do is to convert that back to the original CPI units.
