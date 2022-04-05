@@ -85,16 +85,6 @@
 <span id="id1"></span><h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h1>
 <p>The following provide instructive examples on how to run MRF to generate forecasts and generalized time-varying parameters (GTVPs).</p>
 <p>It is recommended that you see <a class="reference internal" href="modules.html#docs"><span class="std std-ref">Docs</span></a>, particularly the MRF module, before you proceed. You can proceed with the below as an example of how to get started.</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>This is note text. Use a note for information you want the user to
-pay particular attention to.</p>
-<p>If note text runs over a line, make sure the lines wrap and are indented to
-the same level as the note tag. If formatting is incorrect, part of the note
-might not render in the HTML output.</p>
-<p>Notes can have more than one paragraph. Successive paragraphs must
-indent to the same level as the rest of the note.</p>
-</div>
 <section id="python">
 <h2>Python<a class="headerlink" href="#python" title="Permalink to this headline"></a></h2>
 <section id="implementation-example-simple-one-step-forecasting">
@@ -376,15 +366,27 @@ indent to the same level as the rest of the note.</p>
 <span class="n">MAFmat</span> <span class="o">&lt;-</span> <span class="nf">prcomp</span><span class="p">(</span><span class="n">ma_mat</span><span class="p">,</span> <span class="n">rank.</span> <span class="o">=</span> <span class="n">my_x</span><span class="p">)</span><span class="o">$</span><span class="n">x</span>
 </pre></div>
 </div>
-<p>Let’s set up our variables for easy access and also set the seed for replicability:</p>
-<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">&lt;-</span> <span class="nf">nrow</span><span class="p">(</span><span class="n">MAFmat</span><span class="p">)</span>
+<p>Let’s set up our variables for easy access:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">set.seed</span><span class="p">(</span><span class="m">1234</span><span class="p">)</span>
+<span class="n">n</span> <span class="o">&lt;-</span> <span class="nf">nrow</span><span class="p">(</span><span class="n">MAFmat</span><span class="p">)</span>
 <span class="n">idx</span> <span class="o">&lt;-</span> <span class="nf">which</span><span class="p">(</span><span class="nf">colnames</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">==</span> <span class="n">my_var</span><span class="p">)</span>
 <span class="n">X</span> <span class="o">&lt;-</span> <span class="n">imputed</span><span class="p">[[</span><span class="s">&quot;data&quot;</span><span class="p">]][,</span> <span class="n">idx</span><span class="p">]</span>
 <span class="n">X</span> <span class="o">&lt;-</span> <span class="nf">tail</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
 <span class="n">Fmat</span> <span class="o">&lt;-</span> <span class="nf">tail</span><span class="p">(</span><span class="n">Fmat</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
 <span class="n">Y</span> <span class="o">&lt;-</span> <span class="nf">cbind</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Fmat</span><span class="p">,</span> <span class="n">MAFmat</span><span class="p">)</span>
 <span class="nf">colnames</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span> <span class="o">&lt;-</span> <span class="nf">c</span><span class="p">(</span><span class="n">my_var</span><span class="p">,</span> <span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;F_&quot;</span><span class="p">,</span> <span class="m">1</span><span class="o">:</span><span class="n">my_k</span><span class="p">),</span> <span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;MAF_&quot;</span><span class="p">,</span> <span class="m">1</span><span class="o">:</span><span class="n">my_x</span><span class="p">))</span>
-<span class="nf">set.seed</span><span class="p">(</span><span class="m">1234</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can now take a look at our input data:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">print</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
+
+        <span class="n">PAYEMS</span>       <span class="n">F_1</span>         <span class="n">F_2</span>         <span class="n">F_3</span>           <span class="n">F_4</span>          <span class="n">F_5</span>        <span class="n">MAF_1</span>     <span class="n">MAF_2</span>     <span class="n">MAF_3</span>
+<span class="m">60</span>  <span class="m">0.0007806966</span>  <span class="m">-3.448621</span>  <span class="m">-3.7578079</span>   <span class="m">2.135086615</span>   <span class="m">6.1580987</span>  <span class="m">-0.75658675</span>  <span class="m">-24.43069</span>  <span class="m">23.65243</span>  <span class="m">-11.18031</span>
+<span class="m">61</span>  <span class="m">0.0000794812</span>  <span class="m">-2.437831</span>   <span class="m">1.5382544</span>  <span class="m">-1.779136678</span>   <span class="m">9.9564912</span>  <span class="m">-0.70590524</span>  <span class="m">-25.74333</span>  <span class="m">23.10433</span>  <span class="m">-11.57520</span>
+<span class="m">62</span> <span class="m">-0.0005709598</span>  <span class="m">-5.140423</span>   <span class="m">0.2617188</span>  <span class="m">-1.144619273</span>   <span class="m">7.8978095</span>  <span class="m">-0.52537640</span>  <span class="m">-27.53283</span>  <span class="m">22.53457</span>  <span class="m">-12.68836</span>
+<span class="m">63</span> <span class="m">-0.0003543035</span>  <span class="m">-4.333899</span>   <span class="m">3.1338272</span>  <span class="m">-1.938025976</span>   <span class="m">8.5230994</span>  <span class="m">-0.20404637</span>  <span class="m">-29.39276</span>  <span class="m">21.75854</span>  <span class="m">-13.35939</span>
+<span class="m">64</span> <span class="m">-0.0017371797</span>  <span class="m">-4.135100</span>   <span class="m">0.6067619</span>  <span class="m">-0.008076702</span>  <span class="m">-0.9087045</span>  <span class="m">-1.57366593</span>  <span class="m">-31.23286</span>  <span class="m">21.07104</span>  <span class="m">-14.41252</span>
+<span class="m">65</span> <span class="m">-0.0012831063</span>  <span class="m">-1.806275</span>   <span class="m">3.6440667</span>  <span class="m">-2.393721847</span>  <span class="m">-3.3302690</span>  <span class="m">-0.02333614</span>  <span class="m">-32.65311</span>  <span class="m">20.01826</span>  <span class="m">-14.79434</span>
 </pre></div>
 </div>
 <p>And with all of that out of the way, it’s time to fit MRF! We’re going to loop through from 1 until the eventual forecast horizon, each time setting our data matrix and the position of our variables that we want to be time-varying.</p>
@@ -442,6 +444,172 @@ indent to the same level as the rest of the note.</p>
 <img alt="_images/GTVP_nfp.svg" src="_images/GTVP_nfp.svg" /></section>
 <section id="implementation-example-multi-step-macro-forecasting">
 <h3>Implementation Example: Multi-Step Macro Forecasting<a class="headerlink" href="#implementation-example-multi-step-macro-forecasting" title="Permalink to this headline"></a></h3>
+<p>Let’s say that our goal is to forecast inflation (CPI) three periods ahead using the FRED macroeconomic data base (FREDMD).</p>
+<p>Firstly, we will need to load MRF. We will also load the fbi package, which let’s us read and manipulate FRED data, and several other useful libraries.</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">MacroRF</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="n">fbi</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="n">tidyverse</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="n">lubridate</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="n">vars</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Our goal is to forecast CPI, so we’ll set that as our dependent variable. As predictors, we’re going to have 5 factors (principal components) of the FREDMD data base with the first three (our <span class="math notranslate nohighlight">\(X_t\)</span>) included in our linear equation, all at a lag of three periods. Our data is going to start on Jan 1st 2003 and we’re going to make predictions on a three-period forecast horizon:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="c1">### Variable from FRED</span>
+<span class="n">my_var</span> <span class="o">&lt;-</span> <span class="s">&quot;CPIAUCSL&quot;</span>
+
+<span class="c1">### Number of factors</span>
+<span class="n">my_k</span> <span class="o">&lt;-</span> <span class="m">5</span>
+
+<span class="c1">### First number of factors in linear eqn</span>
+<span class="n">my_x</span> <span class="o">&lt;-</span> <span class="m">3</span>
+
+<span class="c1">### Lags</span>
+<span class="n">my_p</span> <span class="o">&lt;-</span> <span class="m">3</span>
+
+<span class="c1">### Start Date</span>
+<span class="n">start_date</span> <span class="o">&lt;-</span> <span class="s">&quot;2003-01-01&quot;</span>
+
+<span class="c1">### Forecast Horizon</span>
+<span class="n">hor</span> <span class="o">&lt;-</span> <span class="m">3</span>
+</pre></div>
+</div>
+<p>With our forecasting setup defined, let’s read the data from FRED:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">df</span> <span class="o">&lt;-</span> <span class="nf">fredmd</span><span class="p">(</span><span class="n">file</span> <span class="o">=</span> <span class="s">&quot;https://files.stlouisfed.org/files/htdocs/fred-md/monthly/current.csv&quot;</span><span class="p">,</span>
+            <span class="n">transform</span> <span class="o">=</span> <span class="kc">TRUE</span><span class="p">,</span>
+            <span class="n">date_start</span> <span class="o">=</span> <span class="nf">ymd</span><span class="p">(</span><span class="n">start_date</span><span class="p">))</span>
+
+<span class="n">df_for_names</span> <span class="o">&lt;-</span> <span class="nf">read_csv</span><span class="p">(</span><span class="s">&quot;https://files.stlouisfed.org/files/htdocs/fred-md/monthly/current.csv&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Taking a look at the data frame, we have 229 rows and 127 columns (not all shown here):</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">print</span><span class="p">(</span><span class="nf">head</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
+
+          <span class="n">RPI</span>        <span class="n">W875RX1</span>     <span class="n">DPCERA3M086SBEA</span>  <span class="kc">...</span>        <span class="n">INVEST</span>    <span class="n">VIXCLSx</span>
+<span class="m">529</span> <span class="m">-0.0032978454</span> <span class="m">-0.004065960</span>   <span class="m">-0.0001315782</span>    <span class="kc">...</span>    <span class="m">-0.020117881</span>  <span class="m">30.6685</span>
+<span class="m">530</span> <span class="m">-0.0037021507</span> <span class="m">-0.003959223</span>   <span class="m">-0.0032350855</span>    <span class="kc">...</span>    <span class="m">-0.002235762</span>  <span class="m">35.1947</span>
+<span class="m">531</span>  <span class="m">0.0017066104</span>  <span class="m">0.001560944</span>    <span class="m">0.0057321149</span>    <span class="kc">...</span>    <span class="m">-0.002235762</span>  <span class="m">35.1947</span>
+<span class="m">532</span>  <span class="m">0.0046942035</span>  <span class="m">0.004801033</span>    <span class="m">0.0047141822</span>    <span class="kc">...</span>     <span class="m">0.001445046</span>  <span class="m">27.1423</span>
+<span class="m">533</span>  <span class="m">0.0077470739</span>  <span class="m">0.007832646</span>    <span class="m">0.0032133589</span>    <span class="kc">...</span>     <span class="m">0.009581121</span>  <span class="m">22.5485</span>
+<span class="m">534</span>  <span class="m">0.0035093161</span>  <span class="m">0.003418945</span>    <span class="m">0.0053366834</span>    <span class="kc">...</span>    <span class="m">-0.002602376</span>  <span class="m">22.3490</span>
+<span class="m">535</span>  <span class="m">0.0009887095</span>  <span class="m">0.000777240</span>    <span class="m">0.0045115509</span>    <span class="kc">...</span>    <span class="m">-0.017077098</span>  <span class="m">21.2068</span>
+</pre></div>
+</div>
+<p>Let’s process the data, including handling outliers and missing values:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="c1"># Setting column names</span>
+<span class="nf">colnames</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">&lt;-</span> <span class="nf">colnames</span><span class="p">(</span><span class="n">df_for_names</span><span class="p">)</span>
+
+<span class="c1"># Removing outliers in the series</span>
+<span class="n">df</span> <span class="o">&lt;-</span> <span class="nf">rm_outliers.fredmd</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+
+<span class="n">df</span><span class="p">[[</span><span class="s">&quot;sasdate&quot;</span><span class="p">]]</span> <span class="o">&lt;-</span> <span class="kc">NULL</span>
+
+<span class="c1"># Handling missing values</span>
+<span class="n">imputed</span> <span class="o">&lt;-</span> <span class="nf">tw_apc</span><span class="p">(</span><span class="n">X</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
+         <span class="n">kmax</span> <span class="o">=</span> <span class="n">my_k</span><span class="p">,</span>
+         <span class="n">center</span> <span class="o">=</span> <span class="kc">TRUE</span><span class="p">,</span>
+         <span class="n">standardize</span> <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Let’s set up our matrix of factors using principal component analysis (PCA):</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="c1"># Decomposing the data matrix into sparse, low-rank components</span>
+<span class="n">afm</span> <span class="o">&lt;-</span> <span class="nf">rpca</span><span class="p">(</span><span class="n">X</span> <span class="o">=</span> <span class="n">imputed</span><span class="p">[[</span><span class="s">&quot;data&quot;</span><span class="p">]],</span>
+            <span class="n">kmax</span> <span class="o">=</span> <span class="n">my_k</span><span class="p">,</span>
+            <span class="n">standardize</span> <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
+
+<span class="c1"># Establishing and scaling robust PCA factors - the variables for our forecast</span>
+<span class="n">Fmat</span> <span class="o">&lt;-</span> <span class="nf">prcomp</span><span class="p">(</span><span class="nf">scale</span><span class="p">(</span><span class="n">imputed</span><span class="p">[[</span><span class="s">&quot;data&quot;</span><span class="p">]]),</span> <span class="n">rank.</span> <span class="o">=</span> <span class="n">my_k</span><span class="p">)</span><span class="o">$</span><span class="n">x</span>
+
+<span class="c1"># Encoding the predictors</span>
+<span class="n">ma_mat</span> <span class="o">&lt;-</span> <span class="nf">embed</span><span class="p">(</span><span class="nf">scale</span><span class="p">(</span><span class="n">imputed</span><span class="p">[[</span><span class="s">&quot;data&quot;</span><span class="p">]]),</span> <span class="m">12</span><span class="p">)</span>
+
+<span class="c1"># Merge the matrices</span>
+<span class="n">ma_mat</span> <span class="o">&lt;-</span> <span class="nf">cbind</span><span class="p">(</span><span class="nf">scale</span><span class="p">(</span><span class="n">imputed</span><span class="p">[[</span><span class="s">&quot;data&quot;</span><span class="p">]])</span> <span class="o">%&gt;%</span> <span class="nf">tail</span><span class="p">(</span><span class="nf">nrow</span><span class="p">(</span><span class="n">ma_mat</span><span class="p">)),</span> <span class="n">ma_mat</span><span class="p">)</span>
+
+<span class="c1"># Decomposing the data matrix into sparse, low-rank components</span>
+<span class="n">MAFmat</span> <span class="o">&lt;-</span> <span class="nf">prcomp</span><span class="p">(</span><span class="n">ma_mat</span><span class="p">,</span> <span class="n">rank.</span> <span class="o">=</span> <span class="n">my_x</span><span class="p">)</span><span class="o">$</span><span class="n">x</span>
+</pre></div>
+</div>
+<p>Let’s set up our variables for easy access:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">n</span> <span class="o">&lt;-</span> <span class="nf">nrow</span><span class="p">(</span><span class="n">MAFmat</span><span class="p">)</span>
+<span class="n">idx</span> <span class="o">&lt;-</span> <span class="nf">which</span><span class="p">(</span><span class="nf">colnames</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">==</span> <span class="n">my_var</span><span class="p">)</span>
+<span class="n">X</span> <span class="o">&lt;-</span> <span class="n">imputed</span><span class="p">[[</span><span class="s">&quot;data&quot;</span><span class="p">]][,</span> <span class="n">idx</span><span class="p">]</span>
+<span class="n">X</span> <span class="o">&lt;-</span> <span class="nf">tail</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+<span class="n">Fmat</span> <span class="o">&lt;-</span> <span class="nf">tail</span><span class="p">(</span><span class="n">Fmat</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+<span class="n">Y</span> <span class="o">&lt;-</span> <span class="nf">cbind</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">Fmat</span><span class="p">,</span> <span class="n">MAFmat</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can now take a look at our input data:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">print</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
+
+      <span class="n">CPIAUCSL</span>      <span class="n">F_1</span>         <span class="n">F_2</span>         <span class="n">F_3</span>          <span class="n">F_4</span>         <span class="n">F_5</span>       <span class="n">MAF_1</span>      <span class="n">MAF_2</span>      <span class="n">MAF_3</span>
+<span class="m">12</span>  <span class="m">2.158370e-03</span>  <span class="m">1.173100</span>   <span class="m">0.1729750</span>  <span class="m">-3.42070409</span>  <span class="m">-1.3607214</span>  <span class="m">-2.0993337</span>  <span class="m">-4.068628</span>  <span class="m">4.7082964</span>  <span class="m">-13.40729</span>
+<span class="m">13</span>  <span class="m">1.604339e-03</span>  <span class="m">2.049119</span>   <span class="m">0.7857849</span>  <span class="m">-3.07097371</span>  <span class="m">-0.7735698</span>  <span class="m">-1.8544508</span>  <span class="m">-4.226717</span>  <span class="m">3.9713696</span>  <span class="m">-13.63371</span>
+<span class="m">14</span> <span class="m">-2.158623e-03</span>  <span class="m">1.074777</span>  <span class="m">-2.8700708</span>  <span class="m">-0.03065825</span>  <span class="m">-0.7579336</span>  <span class="m">-2.6595706</span>  <span class="m">-5.273620</span>  <span class="m">3.1579670</span>  <span class="m">-12.32650</span>
+<span class="m">15</span> <span class="m">-4.590208e-06</span>  <span class="m">1.588660</span>  <span class="m">-2.6480670</span>  <span class="m">-1.28308755</span>   <span class="m">0.1182666</span>  <span class="m">-1.7615131</span>  <span class="m">-6.650085</span>  <span class="m">2.6910707</span>  <span class="m">-10.96458</span>
+<span class="m">16</span> <span class="m">-5.380462e-04</span>  <span class="m">1.728049</span>  <span class="m">-3.8522863</span>  <span class="m">-1.42536771</span>  <span class="m">-4.0382254</span>  <span class="m">-0.6121978</span>  <span class="m">-8.065427</span>  <span class="m">1.6399727</span>  <span class="m">-10.62753</span>
+<span class="m">17</span>  <span class="m">2.657721e-03</span>  <span class="m">3.827819</span>  <span class="m">-1.4023308</span>  <span class="m">-1.44571729</span>  <span class="m">-5.2314203</span>  <span class="m">-1.8990988</span>  <span class="m">-8.841191</span>  <span class="m">0.2838795</span>  <span class="m">-11.98170</span>
+</pre></div>
+</div>
+<p>We’re going to want to save our forest output as we loop through to the eventual forecast horizon, so we’ll create an array where the output can be stored. We can also set the seed for replicability:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">r_list</span> <span class="o">&lt;-</span> <span class="nf">list</span><span class="p">()</span>
+<span class="nf">set.seed</span><span class="p">(</span><span class="m">1234</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And with all of that out of the way, it’s time to fit MRF! We’re going to conduct recursive forecasting by looping through from 1 until the eventual forecast horizon, each time setting our data matrix and the position of our variables that we want to be time-varying:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">for</span><span class="p">(</span><span class="n">i</span> <span class="n">in</span> <span class="m">1</span><span class="o">:</span><span class="n">hor</span><span class="p">)</span> <span class="p">{</span>
+
+<span class="nf">if</span><span class="p">(</span><span class="n">i</span> <span class="o">==</span> <span class="m">1</span><span class="p">)</span> <span class="p">{</span>
+   <span class="n">Y_temp</span> <span class="o">&lt;-</span> <span class="n">Y</span><span class="p">[</span><span class="nf">c</span><span class="p">(</span><span class="m">1</span><span class="o">:</span><span class="nf">nrow</span><span class="p">(</span><span class="n">Y</span><span class="p">),</span> <span class="nf">nrow</span><span class="p">(</span><span class="n">Y</span><span class="p">)),</span> <span class="p">]</span>
+   <span class="n">mat</span> <span class="o">&lt;-</span> <span class="nf">VAR</span><span class="p">(</span><span class="n">Y_temp</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">my_p</span> <span class="o">-</span> <span class="m">1</span><span class="p">,</span> <span class="n">type</span> <span class="o">=</span> <span class="s">&quot;trend&quot;</span><span class="p">)[[</span><span class="s">&quot;datamat&quot;</span><span class="p">]]</span> <span class="o">%&gt;%</span>
+      <span class="nf">as.data.frame</span><span class="p">()</span> <span class="o">%&gt;%</span>
+      <span class="nf">select</span><span class="p">(</span><span class="n">my_var</span><span class="p">,</span> <span class="nf">contains</span><span class="p">(</span><span class="s">&quot;.l&quot;</span><span class="p">),</span> <span class="n">trend</span><span class="p">)</span>
+
+   <span class="nf">rownames</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span> <span class="o">&lt;-</span> <span class="kc">NULL</span>
+   <span class="n">x_pos1</span> <span class="o">&lt;-</span> <span class="nf">which</span><span class="p">(</span><span class="nf">str_detect</span><span class="p">(</span><span class="nf">colnames</span><span class="p">(</span><span class="n">mat</span><span class="p">),</span> <span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;F_&quot;</span><span class="p">,</span> <span class="m">1</span><span class="o">:</span><span class="n">my_x</span><span class="p">,</span> <span class="s">&quot;.l&quot;</span><span class="p">,</span> <span class="nf">rep</span><span class="p">(</span><span class="m">1</span><span class="o">:</span><span class="n">my_p</span><span class="p">,</span> <span class="n">each</span> <span class="o">=</span> <span class="n">my_x</span><span class="p">),</span> <span class="n">collapse</span> <span class="o">=</span> <span class="s">&quot;|&quot;</span><span class="p">)))</span>
+   <span class="n">x_pos2</span> <span class="o">&lt;-</span> <span class="nf">which</span><span class="p">(</span><span class="nf">str_detect</span><span class="p">(</span><span class="nf">colnames</span><span class="p">(</span><span class="n">mat</span><span class="p">),</span> <span class="nf">paste0</span><span class="p">(</span><span class="n">my_var</span><span class="p">,</span> <span class="s">&quot;.l&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">collapse</span> <span class="o">=</span> <span class="s">&quot;|&quot;</span><span class="p">)))</span>
+   <span class="n">x_pos</span> <span class="o">=</span> <span class="nf">c</span><span class="p">(</span><span class="n">x_pos1</span><span class="p">,</span> <span class="n">x_pos2</span><span class="p">)</span>
+   <span class="n">r_list</span><span class="p">[[</span><span class="n">i</span><span class="p">]]</span> <span class="o">&lt;-</span> <span class="nf">MRF</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">x.pos</span> <span class="o">=</span> <span class="n">x_pos</span><span class="p">,</span>
+                     <span class="n">oos.pos</span> <span class="o">=</span> <span class="nf">nrow</span><span class="p">(</span><span class="n">mat</span><span class="p">),</span>
+                     <span class="n">ridge.lambda</span> <span class="o">=</span> <span class="m">0.30</span><span class="p">,</span>
+                     <span class="n">rw.regul</span> <span class="o">=</span> <span class="m">0.80</span><span class="p">,</span>
+                     <span class="n">trend.push</span> <span class="o">=</span> <span class="m">6</span><span class="p">,</span>
+                     <span class="n">B</span> <span class="o">=</span> <span class="m">40</span><span class="p">,</span>
+                     <span class="n">fast.rw</span> <span class="o">=</span> <span class="kc">TRUE</span><span class="p">)</span>
+<span class="p">}</span>
+
+<span class="n">else</span> <span class="nf">if</span><span class="p">(</span><span class="n">i</span> <span class="o">&gt;</span> <span class="m">1</span><span class="p">)</span> <span class="p">{</span>
+   <span class="n">Y_temp</span> <span class="o">&lt;-</span> <span class="n">Y</span><span class="p">[</span><span class="nf">c</span><span class="p">(</span><span class="m">1</span><span class="o">:</span><span class="nf">nrow</span><span class="p">(</span><span class="n">Y</span><span class="p">),</span> <span class="nf">rep</span><span class="p">(</span><span class="nf">nrow</span><span class="p">(</span><span class="n">Y</span><span class="p">),</span> <span class="n">i</span><span class="p">)),</span> <span class="p">]</span>
+   <span class="n">sel_rm</span> <span class="o">&lt;-</span> <span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;.l&quot;</span><span class="p">,</span> <span class="m">1</span><span class="o">:</span><span class="p">(</span><span class="n">i</span><span class="m">-1</span><span class="p">),</span> <span class="n">collapse</span> <span class="o">=</span> <span class="s">&quot;|&quot;</span><span class="p">)</span>
+   <span class="n">mat</span> <span class="o">&lt;-</span> <span class="nf">VAR</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span> <span class="n">p</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">my_p</span><span class="p">,</span> <span class="n">type</span> <span class="o">=</span> <span class="s">&quot;trend&quot;</span><span class="p">)[[</span><span class="s">&quot;datamat&quot;</span><span class="p">]]</span> <span class="o">%&gt;%</span>
+      <span class="nf">as.data.frame</span><span class="p">()</span> <span class="o">%&gt;%</span>
+      <span class="nf">select</span><span class="p">(</span><span class="n">my_var</span><span class="p">,</span> <span class="nf">contains</span><span class="p">(</span><span class="s">&quot;.l&quot;</span><span class="p">),</span> <span class="n">trend</span><span class="p">)</span> <span class="o">%&gt;%</span>
+      <span class="nf">select</span><span class="p">(</span><span class="o">-</span><span class="nf">matches</span><span class="p">(</span><span class="n">sel_rm</span><span class="p">))</span>
+   <span class="nf">rownames</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span> <span class="o">&lt;-</span> <span class="kc">NULL</span>
+   <span class="n">mat</span><span class="p">[,</span><span class="m">1</span><span class="p">]</span><span class="o">=</span><span class="n">mat</span><span class="p">[,</span><span class="m">1</span><span class="p">]</span><span class="o">*</span><span class="m">1200</span>
+
+   <span class="n">x_pos1</span> <span class="o">&lt;-</span> <span class="nf">which</span><span class="p">(</span><span class="nf">str_detect</span><span class="p">(</span><span class="nf">colnames</span><span class="p">(</span><span class="n">mat</span><span class="p">),</span> <span class="nf">paste0</span><span class="p">(</span><span class="s">&quot;F_&quot;</span><span class="p">,</span> <span class="m">1</span><span class="o">:</span><span class="n">my_x</span><span class="p">,</span> <span class="s">&quot;.l&quot;</span><span class="p">,</span> <span class="nf">rep</span><span class="p">(</span><span class="n">i</span><span class="o">:</span><span class="p">(</span><span class="n">my_p</span> <span class="o">+</span> <span class="n">i</span><span class="p">),</span> <span class="n">each</span> <span class="o">=</span> <span class="n">my_x</span><span class="p">),</span> <span class="n">collapse</span> <span class="o">=</span> <span class="s">&quot;|&quot;</span><span class="p">)))</span>
+   <span class="n">x_pos2</span> <span class="o">&lt;-</span> <span class="nf">which</span><span class="p">(</span><span class="nf">str_detect</span><span class="p">(</span><span class="nf">colnames</span><span class="p">(</span><span class="n">mat</span><span class="p">),</span> <span class="nf">paste0</span><span class="p">(</span><span class="n">my_var</span><span class="p">,</span> <span class="s">&quot;.l&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">collapse</span> <span class="o">=</span> <span class="s">&quot;|&quot;</span><span class="p">)))</span>
+   <span class="n">r_list</span><span class="p">[[</span><span class="n">i</span><span class="p">]]</span> <span class="o">&lt;-</span> <span class="nf">MRF</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">x.pos</span> <span class="o">=</span> <span class="n">x_pos</span><span class="p">,</span>
+                     <span class="n">oos.pos</span> <span class="o">=</span> <span class="nf">nrow</span><span class="p">(</span><span class="n">mat</span><span class="p">),</span>
+                     <span class="n">ridge.lambda</span> <span class="o">=</span> <span class="m">0.30</span><span class="p">,</span>
+                     <span class="n">rw.regul</span> <span class="o">=</span> <span class="m">0.80</span><span class="p">,</span>
+                     <span class="n">trend.push</span> <span class="o">=</span> <span class="m">6</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span>
+                     <span class="n">B</span> <span class="o">=</span> <span class="m">40</span><span class="p">)</span>
+
+<span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>That’s it! Our models are fit and the training is finished. All we need to do now is to assign our predictions for easy access.</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">preds</span> <span class="o">&lt;-</span> <span class="nf">c</span><span class="p">()</span>
+<span class="nf">for</span><span class="p">(</span><span class="n">i</span> <span class="n">in</span> <span class="m">1</span><span class="o">:</span><span class="n">hor</span><span class="p">)</span> <span class="n">preds</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;-</span> <span class="n">r_list</span><span class="p">[[</span><span class="n">i</span><span class="p">]][[</span><span class="s">&quot;pred&quot;</span><span class="p">]]</span>
+<span class="n">preds</span> <span class="o">&lt;-</span> <span class="nf">sapply</span><span class="p">(</span><span class="n">r_list</span><span class="p">,</span> <span class="nf">function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="n">x</span><span class="p">[[</span><span class="s">&quot;pred&quot;</span><span class="p">]])</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="n">preds</span><span class="p">)</span>
+<span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="m">-0.00156105</span>  <span class="m">0.52877814</span>  <span class="m">0.79409874</span>
+</pre></div>
+</div>
+<p>Now we have our raw three-step predictions. All that’s left to do is to convert that back to the original CPI units.</p>
 </section>
 </section>
 </section>

@@ -363,10 +363,11 @@ Let's set up our matrix of factors using principal component analysis (PCA):
    # Decomposing the data matrix into sparse, low-rank components
    MAFmat <- prcomp(ma_mat, rank. = my_x)$x
 
-Let's set up our variables for easy access and also set the seed for replicability:
+Let's set up our variables for easy access:
 
 .. code-block:: r
 
+   set.seed(1234)  
    n <- nrow(MAFmat)
    idx <- which(colnames(df) == my_var)
    X <- imputed[["data"]][, idx]
@@ -374,7 +375,21 @@ Let's set up our variables for easy access and also set the seed for replicabili
    Fmat <- tail(Fmat, n)
    Y <- cbind(X, Fmat, MAFmat)
    colnames(Y) <- c(my_var, paste0("F_", 1:my_k), paste0("MAF_", 1:my_x))
-   set.seed(1234)  
+
+We can now take a look at our input data:
+
+.. code-block:: r
+
+   print(Y)
+
+           PAYEMS       F_1         F_2         F_3           F_4          F_5        MAF_1     MAF_2     MAF_3
+   60  0.0007806966  -3.448621  -3.7578079   2.135086615   6.1580987  -0.75658675  -24.43069  23.65243  -11.18031
+   61  0.0000794812  -2.437831   1.5382544  -1.779136678   9.9564912  -0.70590524  -25.74333  23.10433  -11.57520
+   62 -0.0005709598  -5.140423   0.2617188  -1.144619273   7.8978095  -0.52537640  -27.53283  22.53457  -12.68836
+   63 -0.0003543035  -4.333899   3.1338272  -1.938025976   8.5230994  -0.20404637  -29.39276  21.75854  -13.35939
+   64 -0.0017371797  -4.135100   0.6067619  -0.008076702  -0.9087045  -1.57366593  -31.23286  21.07104  -14.41252
+   65 -0.0012831063  -1.806275   3.6440667  -2.393721847  -3.3302690  -0.02333614  -32.65311  20.01826  -14.79434
+
 
 And with all of that out of the way, it's time to fit MRF! We're going to loop through from 1 until the eventual forecast horizon, each time setting our data matrix and the position of our variables that we want to be time-varying.
 
@@ -457,21 +472,183 @@ Firstly, we will need to load MRF. We will also load the fbi package, which let'
    library(vars)
 
 
+Our goal is to forecast CPI, so we'll set that as our dependent variable. As predictors, we're going to have 5 factors (principal components) of the FREDMD data base with the first three (our :math:`X_t`) included in our linear equation, all at a lag of three periods. Our data is going to start on Jan 1st 2003 and we're going to make predictions on a three-period forecast horizon:
+
 .. code-block:: r
-   # Set Up
+
    ### Variable from FRED
    my_var <- "CPIAUCSL"
+
    ### Number of factors
    my_k <- 5
+
    ### First number of factors in linear eqn
    my_x <- 3
+
    ### Lags
    my_p <- 3
+
    ### Start Date
    start_date <- "2003-01-01"
+
    ### Forecast Horizon
    hor <- 3
 
+With our forecasting setup defined, let’s read the data from FRED:
 
-Our goal is to forecast CPI, so we'll set that as our dependent variable. As predictors, we're going to have 5 factors (principal components) of the FREDMD data base with the first three (our :math:`X_t`) included in our linear equation, all at a lag of three periods. Our data is going to start on Jan 1st 2003 and we're going to make predictions using a three-period forecast horizon:
+.. code-block:: r
 
+   df <- fredmd(file = "https://files.stlouisfed.org/files/htdocs/fred-md/monthly/current.csv",
+               transform = TRUE,
+               date_start = ymd(start_date))
+
+   df_for_names <- read_csv("https://files.stlouisfed.org/files/htdocs/fred-md/monthly/current.csv")
+
+
+Taking a look at the data frame, we have 229 rows and 127 columns (not all shown here):
+
+.. code-block:: r
+
+   print(head(df))
+
+             RPI        W875RX1     DPCERA3M086SBEA  ...        INVEST    VIXCLSx
+   529 -0.0032978454 -0.004065960   -0.0001315782    ...    -0.020117881  30.6685
+   530 -0.0037021507 -0.003959223   -0.0032350855    ...    -0.002235762  35.1947
+   531  0.0017066104  0.001560944    0.0057321149    ...    -0.002235762  35.1947
+   532  0.0046942035  0.004801033    0.0047141822    ...     0.001445046  27.1423
+   533  0.0077470739  0.007832646    0.0032133589    ...     0.009581121  22.5485
+   534  0.0035093161  0.003418945    0.0053366834    ...    -0.002602376  22.3490
+   535  0.0009887095  0.000777240    0.0045115509    ...    -0.017077098  21.2068
+
+Let's process the data, including handling outliers and missing values:
+
+
+.. code-block:: r
+
+   # Setting column names
+   colnames(df) <- colnames(df_for_names)
+
+   # Removing outliers in the series
+   df <- rm_outliers.fredmd(df)
+
+   df[["sasdate"]] <- NULL
+
+   # Handling missing values
+   imputed <- tw_apc(X = df,
+            kmax = my_k,
+            center = TRUE,
+            standardize = TRUE)
+
+   
+Let’s set up our matrix of factors using principal component analysis (PCA):
+
+.. code-block:: r
+
+   # Decomposing the data matrix into sparse, low-rank components
+   afm <- rpca(X = imputed[["data"]], 
+               kmax = my_k,
+               standardize = TRUE)
+
+   # Establishing and scaling robust PCA factors - the variables for our forecast
+   Fmat <- prcomp(scale(imputed[["data"]]), rank. = my_k)$x
+
+   # Encoding the predictors
+   ma_mat <- embed(scale(imputed[["data"]]), 12)
+
+   # Merge the matrices
+   ma_mat <- cbind(scale(imputed[["data"]]) %>% tail(nrow(ma_mat)), ma_mat)
+
+   # Decomposing the data matrix into sparse, low-rank components
+   MAFmat <- prcomp(ma_mat, rank. = my_x)$x
+
+Let’s set up our variables for easy access:
+
+.. code-block:: r
+
+   n <- nrow(MAFmat)
+   idx <- which(colnames(df) == my_var)
+   X <- imputed[["data"]][, idx]
+   X <- tail(X, n)
+   Fmat <- tail(Fmat, n)
+   Y <- cbind(X, Fmat, MAFmat)
+
+We can now take a look at our input data:
+
+.. code-block:: r
+
+   print(Y)
+
+         CPIAUCSL      F_1         F_2         F_3          F_4         F_5       MAF_1      MAF_2      MAF_3
+   12  2.158370e-03  1.173100   0.1729750  -3.42070409  -1.3607214  -2.0993337  -4.068628  4.7082964  -13.40729
+   13  1.604339e-03  2.049119   0.7857849  -3.07097371  -0.7735698  -1.8544508  -4.226717  3.9713696  -13.63371
+   14 -2.158623e-03  1.074777  -2.8700708  -0.03065825  -0.7579336  -2.6595706  -5.273620  3.1579670  -12.32650
+   15 -4.590208e-06  1.588660  -2.6480670  -1.28308755   0.1182666  -1.7615131  -6.650085  2.6910707  -10.96458
+   16 -5.380462e-04  1.728049  -3.8522863  -1.42536771  -4.0382254  -0.6121978  -8.065427  1.6399727  -10.62753
+   17  2.657721e-03  3.827819  -1.4023308  -1.44571729  -5.2314203  -1.8990988  -8.841191  0.2838795  -11.98170
+
+We're going to want to save our forest output as we loop through to the eventual forecast horizon, so we'll create an array where the output can be stored. We can also set the seed for replicability:
+
+.. code-block:: r
+
+   r_list <- list()
+   set.seed(1234)
+
+And with all of that out of the way, it's time to fit MRF! We're going to conduct recursive forecasting by looping through from 1 until the eventual forecast horizon, each time setting our data matrix and the position of our variables that we want to be time-varying:
+
+.. code-block:: r
+
+   for(i in 1:hor) {
+
+   if(i == 1) {
+      Y_temp <- Y[c(1:nrow(Y), nrow(Y)), ]
+      mat <- VAR(Y_temp, p = i + my_p - 1, type = "trend")[["datamat"]] %>%
+         as.data.frame() %>%
+         select(my_var, contains(".l"), trend)
+
+      rownames(mat) <- NULL
+      x_pos1 <- which(str_detect(colnames(mat), paste0("F_", 1:my_x, ".l", rep(1:my_p, each = my_x), collapse = "|")))
+      x_pos2 <- which(str_detect(colnames(mat), paste0(my_var, ".l", i, collapse = "|")))
+      x_pos = c(x_pos1, x_pos2)
+      r_list[[i]] <- MRF(mat, x.pos = x_pos,
+                        oos.pos = nrow(mat),
+                        ridge.lambda = 0.30,
+                        rw.regul = 0.80, 
+                        trend.push = 6,
+                        B = 40,
+                        fast.rw = TRUE)
+   } 
+   
+   else if(i > 1) {
+      Y_temp <- Y[c(1:nrow(Y), rep(nrow(Y), i)), ]
+      sel_rm <- paste0(".l", 1:(i-1), collapse = "|")
+      mat <- VAR(Y, p = i + my_p, type = "trend")[["datamat"]] %>%
+         as.data.frame() %>%
+         select(my_var, contains(".l"), trend) %>% 
+         select(-matches(sel_rm))
+      rownames(mat) <- NULL
+      mat[,1]=mat[,1]*1200
+      
+      x_pos1 <- which(str_detect(colnames(mat), paste0("F_", 1:my_x, ".l", rep(i:(my_p + i), each = my_x), collapse = "|")))
+      x_pos2 <- which(str_detect(colnames(mat), paste0(my_var, ".l", i, collapse = "|")))
+      r_list[[i]] <- MRF(mat, x.pos = x_pos,
+                        oos.pos = nrow(mat),
+                        ridge.lambda = 0.30,
+                        rw.regul = 0.80, 
+                        trend.push = 6 + i,
+                        B = 40)
+      
+   }
+   }
+
+That's it! Our models are fit and the training is finished. All we need to do now is to assign our predictions for easy access.
+
+.. code-block:: r
+
+   preds <- c()
+   for(i in 1:hor) preds[i] <- r_list[[i]][["pred"]]
+   preds <- sapply(r_list, function(x) x[["pred"]])
+
+   print(preds)
+   [1] -0.00156105  0.52877814  0.79409874
+
+Now we have our raw three-step predictions. All that's left to do is to convert that back to the original CPI units.
