@@ -4,12 +4,24 @@
 Usage 
 ============================
 
-Python 
-----------------------------
 
 The following provide instructive examples on how to run MRF to generate forecasts and generalized time-varying parameters (GTVPs).
 
 It is recommended that you see :ref:`Docs <docs>`, particularly the MRF module, before you proceed. You can proceed with the below as an example of how to get started. 
+
+.. note::
+   This is note text. Use a note for information you want the user to
+   pay particular attention to.
+
+   If note text runs over a line, make sure the lines wrap and are indented to
+   the same level as the note tag. If formatting is incorrect, part of the note
+   might not render in the HTML output.
+
+   Notes can have more than one paragraph. Successive paragraphs must
+   indent to the same level as the rest of the note.
+   
+Python 
+----------------------------
 
 Implementation Example: Simple One-Step Forecasting
 +++++++++++++++++++++++++++
@@ -193,6 +205,7 @@ And voila, you have a fully trained and backtested model. You are ready to deplo
 R 
 ----------------------------
 
+
 Implementation Example: Simple One-Step Forecasting
 +++++++++++++++++++++++++++
 
@@ -249,10 +262,10 @@ And we're done. You now have MRF predictions and GTVPs! Here's a look at our out
 .. image:: /images/R_GTVPs.svg
       
 
-Implementation Example: Macroeconomic Forecasting
+Implementation Example: One-Step Macro Forecasting
 +++++++++++++++++++++++++++
 
-Let's say that our goal is to forecast non-farm payrolls using the FRED macroeconomic data base (FREDMD).
+Let's say that our goal is to forecast non-farm payrolls one period ahead using the FRED macroeconomic data base (FREDMD).
 
 Let's firstly load MRF. We will also load the fbi package, which let's us read and manipulate FRED data, and several other useful libraries. 
 
@@ -273,7 +286,7 @@ We are also going to initialise the select method, which comes from the dplyr pa
 
 With the boring stuff out of the way, let's go about creating our forecasting setup. 
    
-Our goal is to forecast non-farm payrolls, so we'll set that as our dependent variable. As predictors, we're going to have 5 factors overall, with 3 included in our linear equation at a lag of one. Our data is going to start on Jan 1st 2003 and we're going to make predictions on a one-period forecast horizon:
+Our goal is to forecast non-farm payrolls, so we'll set that as our dependent variable. As predictors, we're going to have 5 factors of the FREDMD data base with the first three (our :math:`X_t`) included in our linear equation, all at a lag of one. Our data is going to start on Jan 1st 2003 and we're going to make predictions on a one-period forecast horizon:
 
 .. code-block:: r
 
@@ -293,7 +306,7 @@ Our goal is to forecast non-farm payrolls, so we'll set that as our dependent va
    start_date <- "2003-01-01"
 
    ### Forecast Horizon
-   hor <- 3
+   hor <- 1
 
 With our forecasting setup defined, let's read the data from FRED:
 
@@ -361,7 +374,7 @@ Let's set up our matrix of factors using principal component analysis (PCA):
    # Decomposing the data matrix into sparse, low-rank components
    MAFmat <- prcomp(ma_mat, rank. = my_x)$x
 
-Let's set up our variables for easy access:
+Let's set up our variables for easy access and also set the seed for replicability:
 
 .. code-block:: r
 
@@ -372,87 +385,72 @@ Let's set up our variables for easy access:
    Fmat <- tail(Fmat, n)
    Y <- cbind(X, Fmat, MAFmat)
    colnames(Y) <- c(my_var, paste0("F_", 1:my_k), paste0("MAF_", 1:my_x))
-
-We're going to want to save our forest output as we loop through to the eventual forecast horizon, so we'll create an array where the output can be stored. We can also set the seed for replicability:
-
-.. code-block:: r
-
-   r_list <- list()
-   set.seed(1234)
+   set.seed(1234)  
 
 And with all of that out of the way, it's time to fit MRF! We're going to loop through from 1 until the eventual forecast horizon, each time setting our data matrix and the position of our variables that we want to be time-varying.
 
 .. code-block:: r
 
-   for(i in 1:hor) {
-
-   if(i == 1) {
       Y_temp <- Y[c(1:nrow(Y), nrow(Y)), ]
+
       mat <- VAR(Y_temp, p = i + my_p - 1, type = "trend")[["datamat"]] %>%
          as.data.frame() %>%
          select(my_var, contains(".l"), trend)
+
       rownames(mat) <- NULL
+
       x_pos1 <- which(str_detect(colnames(mat), paste0("F_", 1:my_x, ".l", rep(1:my_p, each = my_x), collapse = "|")))
       x_pos2 <- which(str_detect(colnames(mat), paste0(my_var, ".l", i, collapse = "|")))
       x_pos = c(x_pos1, x_pos2)
-      r_list[[i]] <- MRF(mat, x.pos = x_pos,
+
+      model <- MRF(mat, x.pos = x_pos,
                         oos.pos = nrow(mat),
                         ridge.lambda = 0.30,
                         trend.push = 6,
                         B = 250,
                         quantile.rate = 0.3,
                         fast.rw = TRUE)
-   } 
-   
-   else if(i > 1) {
-      Y_temp <- Y[c(1:nrow(Y), rep(nrow(Y), i)), ]
-      sel_rm <- paste0(".l", 1:(i-1), collapse = "|")
-      mat <- VAR(Y, p = i + my_p, type = "trend")[["datamat"]] %>%
-         as.data.frame() %>%
-         select(my_var, contains(".l"), trend) %>% 
-         select(-matches(sel_rm))
-      rownames(mat) <- NULL
-      x_pos1 <- which(str_detect(colnames(mat), paste0("F_", 1:my_x, ".l", rep(i:(my_p + i), each = my_x), collapse = "|")))
-      x_pos2 <- which(str_detect(colnames(mat), paste0(my_var, ".l", i, collapse = "|")))
-      r_list[[i]] <- MRF(mat, x.pos = x_pos,
-                        oos.pos = nrow(mat),
-                        ridge.lambda = 0.30,
-                        trend.push = 6 + i,
-                        B = 250)
-   }
-   }
 
 That's it! Our models are fit and the training is finished. All we need to do now is to access our predictions.
 
 .. code-block:: r
 
-   preds <- c()
-
-   for(i in 1:hor) preds[i] <- r_list[[i]][["pred"]]
-
-   preds <- sapply(r_list, function(x) x[["pred"]])
+   preds <- model[["pred"]]
 
    y <- 149629 * cumprod(exp(preds)) - 149629 # Our final forecast!
 
    print(y)
    
-   [1]  547.6148  845.8643 1286.3425
+   [1] 530.0887
 
-And there we have it, our forecasts are as follows:
+And there we have it, our final forecasted value is 530.0887. If we want, we can also access the pre-ensembled forecasts:
 
-.. math::
-   
-   \begin{equation*}
-   \begin{aligned}
-   \begin{aligned}
-   \hat{y}_{t+1|t} = 547.6148 \\
-   \hat{y}_{t+2|t} = 845.8643 \\
-   \hat{y}_{t+3|t} = 1286.3425
-   \end{aligned}
-   \end{aligned} 
-   \end{equation*} 
+.. code-block:: r
+
+   d <- 149629 * exp(model$pred.ensemble) - 149629
+   d_df <- data.frame(d)
+
+Let's visualise the range of our pre-ensembled forecasts by plotting the distribution:
+
+.. code-block:: r
+
+   ggplot(d_df) +
+   theme_bw() +
+   aes(x = d) +
+   geom_density(adjust = 2,fill = "grey") +
+   xlim(c(0, 1000)) +
+   geom_vline(xintercept = median(d)) +
+   theme(plot.background = element_rect(fill = "transparent", colour = NA))+
+   ggtitle("Distribution (density) of pre-ensembled forecasts") +
+   theme(plot.title = element_text(hjust = 0.5)) +
+   xlab("Forecast") 
+
+.. image:: /images/distplot.png
+
+We can also look at the GTVPs to visualise the change in the coefficients corresponding to the constant (:math:`\beta_0`, top-left), the first principal component (:math:`\beta_1`, top-right), second principal component (:math:`\beta_2`, bottom-left) and the third principal component (:math:`\beta_3`, bottom-right).
+
+.. image:: /images/GTVP_nfp.svg
 
 
-We can also look at the GTVPs. The following plots the constant term :math:`\beta_0` (top left), the coefficient corresponding to the first factor :math:`\beta_1` (top right), second factor :math:`\beta_2` (bottom left) and third factor :math:`\beta_3` (bottom right):
-
-.. image:: /images/rfac.svg
+Implementation Example: Multi-Step Macro Forecasting
++++++++++++++++++++++++++++
