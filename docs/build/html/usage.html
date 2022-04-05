@@ -96,8 +96,10 @@
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 </pre></div>
 </div>
-<p>As a way to get started, we have included a dataset of simulated variables with the package at download time:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">simulated_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;../Datasets/mrf_sim.csv&quot;</span><span class="p">,</span> <span class="n">index_col</span> <span class="o">=</span> <span class="s1">&#39;index&#39;</span><span class="p">)</span>
+<p>As a way to get started, we have included a dataset of simulated variables which is easy to download from Google Drive:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">url</span><span class="o">=</span><span class="s1">&#39;https://drive.google.com/file/d/1Sp_2HGdIY0y9m5htlskIbNqWo02FCGNb/view?usp=sharing&#39;</span>
+<span class="n">url</span><span class="o">=</span><span class="s1">&#39;https://drive.google.com/uc?id=&#39;</span> <span class="o">+</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">simulated_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">index_col</span> <span class="o">=</span> <span class="s2">&quot;index&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>We can take a look at this data before we proceed:</p>
@@ -340,7 +342,9 @@
 <section id="implementation-example-financial-trading">
 <h3>Implementation Example: Financial Trading<a class="headerlink" href="#implementation-example-financial-trading" title="Permalink to this headline"></a></h3>
 <p>To start with, let’s read in one of our finance datasets:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">data_in</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s2">&quot;../Datasets/finance.csv&quot;</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">url</span><span class="o">=</span><span class="s1">&#39;https://drive.google.com/file/d/1JANqsAU4Dz8FzHRcdN8x1aakw9FCJU_1/view?usp=sharing&#39;</span>
+<span class="n">url</span><span class="o">=</span><span class="s1">&#39;https://drive.google.com/uc?id=&#39;</span> <span class="o">+</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">data_in</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">index_col</span> <span class="o">=</span> <span class="s2">&quot;index&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>We can take a look at this data using <code class="code docutils literal notranslate"><span class="pre">display(data_in.head(5))</span></code>:</p>

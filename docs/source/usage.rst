@@ -22,11 +22,13 @@ First order of business is to import MRF and matplotlib, a useful plotting packa
    from MRF import *
    import matplotlib.pyplot as plt
 
-As a way to get started, we have included a dataset of simulated variables with the package at download time:
+As a way to get started, we have included a dataset of simulated variables which is easy to download from Google Drive:
 
 .. code-block:: python
 
-   simulated_data = pd.read_csv("../Datasets/mrf_sim.csv", index_col = 'index')
+  url='https://drive.google.com/file/d/1Sp_2HGdIY0y9m5htlskIbNqWo02FCGNb/view?usp=sharing'
+  url='https://drive.google.com/uc?id=' + url.split('/')[-2]
+  simulated_data = pd.read_csv(url, index_col = "index")
 
 We can take a look at this data before we proceed:
 
@@ -330,7 +332,9 @@ To start with, let's read in one of our finance datasets:
 
 .. code-block:: python
 
-   data_in = pd.read_csv("../Datasets/finance.csv")
+   url='https://drive.google.com/file/d/1JANqsAU4Dz8FzHRcdN8x1aakw9FCJU_1/view?usp=sharing'
+   url='https://drive.google.com/uc?id=' + url.split('/')[-2]
+   data_in = pd.read_csv(url, index_col = "index")
 
 We can take a look at this data using :code:`display(data_in.head(5))`::
 
@@ -349,7 +353,6 @@ Since we are not going to predict the price, but rather the return, we need to a
    close_prices = data_in['spy_close']
    data_in = data_in.iloc[:, 1:]
    
-
 We want to have a backtest (oos) period in order to evaluate MRF, so we are going to set up our out-of-sample period to include the last 350 observations:
 
 .. code-block:: python
