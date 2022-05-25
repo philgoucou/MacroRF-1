@@ -7,7 +7,7 @@ Usage
 
 The following provide instructive examples on how to run MRF to generate forecasts and generalized time-varying parameters (GTVPs).
 
-It is recommended that you see :ref:`Docs <docs>`, particularly the MRF module, before you proceed. You can proceed with the below as an example of how to get started. 
+It is recommended that you see :ref:`Docs <docs>`, particularly the MRF module, to get an overview of the hyperparameters. Below we provide examples of how to get started running MRF. 
 
 Python 
 ----------------------------
@@ -144,6 +144,7 @@ First order of business is to import MRF, seaborn (a useful plotting package) an
    from MRF import *
    import seaborn as sns
    import numpy as np
+   import statistics as stats
 
 To download the FREDMD data set, we simply need to scrape it from a Google Drive link as follows:
 
@@ -166,7 +167,7 @@ We can take a look at this dataset before we proceed:
    4    -0.001737   -0.000354  -4.333899   3.133827  -1.938026   8.523099  -0.204046  -29.392758   21.758538  -13.359394    4
    5    -0.001283   -0.001737  -4.135100   0.606762  -0.008077  -0.908704  -1.573666  -31.232862   21.071040  -14.412521    5 
 
-We can now go about defining our forecasting setup. Our goal is to forecast non-farm payrolls, so we'll set that as our dependent variable. As predictors, we're going to have the first three principal factors FA and MAF included in our linear equation all at a lag of one (these will be our :math:`X_t`). We're going to make predictions on a one-period forecast horizon:
+We can now go about defining our forecasting setup. Our goal is to forecast non-farm payrolls, so we'll set that as our dependent variable. As predictors, we're going to have the first two principal factors and a lag on the dependent variable included in our linear equation (these will be our :math:`X_t`). We're going to make predictions on a one-period forecast horizon:
 
 .. code-block:: python
 
@@ -175,19 +176,16 @@ We can now go about defining our forecasting setup. Our goal is to forecast non-
    y_pos = df.columns.get_loc(my_var)
 
    ### Exogenous Variables
-   x_vars = ["PAYEMS.l1", 'F_1.l1', 'F_2.l1']
+   x_vars = ["F_1.l1", "F_2.l1", "PAYEMS.l1"]
    x_pos = [df.columns.get_loc(x) for x in x_vars]
-
-   ### Forecast Horizon
-   hor = 1
 
 We're going to set our out-of-sample position to be only the last value, since we are only interested in predicting the next value for non-farm payrolls.
 
 .. code-block:: python
 
-   oos_pos = np.arange(len(df)- 1, len(df))
+   oos_pos = np.arange(len(df) - 1, len(df))
 
-Now we're ready to fit MRF! We're going to pass in the :code:`y_pos` and :code:`x_pos` we defined above. We are using :code:`ridge_lambda = 0.3` as our ridge regularisation :math:`\lambda`. We are going to set :code:`parallelise = True` and :code:`n_cores = -1` to run MRF across all cores on our machine in parallel.
+Now we're ready to fit MRF! We're going to pass in the :code:`y_pos` and :code:`x_pos` we defined above. We are using :code:`ridge_lambda = 0.001` as our ridge regularisation :math:`\lambda`. We are going to set :code:`parallelise = True` and :code:`n_cores = -1` to run MRF across all cores on our machine in parallel. For descriptions of the other hyperparameters, see :ref:`Docs <docs>`.
 
 .. code-block:: python
 
@@ -220,7 +218,7 @@ That's it! Our models are fit and the training is finished. All we need to do no
 
    print(pred)
 
-   0.003269
+   0.003268
 
 This gives us our predicted log-difference. Now we have to convert that back to the original units:
 
@@ -230,13 +228,17 @@ This gives us our predicted log-difference. Now we have to convert that back to 
 
    print(y)
 
-   489.9376
+   489.8096
 
-And there we have it, our final forecasted value is 489.9376. If we want, we can also access the pre-ensembled forecasts:
+And there we have it, our final forecasted value is 489.8096. If we want, we can also access the pre-ensembled forecasts:
 
 .. code-block:: python
 
    d = [149629 * np.exp(float(value)) - 149629 for value in MRF_output['pred_ensemble']]
+   
+   print(stats.median(d))
+
+   510.3907
 
 Let’s visualise the range of our pre-ensembled forecasts by plotting the distribution:
 
@@ -257,14 +259,10 @@ Let’s visualise the range of our pre-ensembled forecasts by plotting the distr
 
 .. image:: /images/Python_nfpr.png
 
-We can also look at the GTVPs to visualise the change in the coefficients corresponding to the constant (:math:`\beta_0`, top-left), the lagged dependent variable (:math:`\beta_1`, top-right) and the rest of the principal components corresponding to our chosen :math:`X_t`.
+We can also look at the GTVPs to visualise the change in the coefficients corresponding to the constant (:math:`\beta_{0,t}`, top-left), the lagged dependent variable (:math:`\beta_{1,t}`, top-right) and the two principal factors (:math:`\beta_{2,t}` and :math:`\beta_{3,t}`, bottom).
 
 .. image:: /images/Python_nfpr_GTVPs_2.png
 
-Implementation Example: Multi-Step Macro Forecasting
-+++++++++++++++++++++++++++
-
-... Coming Soon
 
 Implementation Example: Financial Trading
 +++++++++++++++++++++++++++
@@ -463,7 +461,7 @@ With our forecasting setup defined, let's read the data from FRED:
    # Reading column names from FRED
    df_for_names <- read_csv("https://files.stlouisfed.org/files/htdocs/fred-md/monthly/2022-02.csv")
 
-Taking a look at the data frame, we have 229 rows and 127 columns (not all shown here):
+Taking a look at the data frame, we have 229 rows and 127 columns (not all shown here). This dataframe starts from index 529 because we have sliced the FREDMD database:
 
 .. code-block:: r
 
@@ -537,15 +535,15 @@ We can now take a look at our input data:
    print(Y)
 
            PAYEMS       F_1         F_2         F_3           F_4          F_5        MAF_1     MAF_2     MAF_3
-   60  0.0007806966  -3.448621  -3.7578079   2.135086615   6.1580987  -0.75658675  -24.43069  23.65243  -11.18031
-   61  0.0000794812  -2.437831   1.5382544  -1.779136678   9.9564912  -0.70590524  -25.74333  23.10433  -11.57520
-   62 -0.0005709598  -5.140423   0.2617188  -1.144619273   7.8978095  -0.52537640  -27.53283  22.53457  -12.68836
-   63 -0.0003543035  -4.333899   3.1338272  -1.938025976   8.5230994  -0.20404637  -29.39276  21.75854  -13.35939
-   64 -0.0017371797  -4.135100   0.6067619  -0.008076702  -0.9087045  -1.57366593  -31.23286  21.07104  -14.41252
-   65 -0.0012831063  -1.806275   3.6440667  -2.393721847  -3.3302690  -0.02333614  -32.65311  20.01826  -14.79434
+   1  0.0007806966  -3.448621  -3.7578079   2.135086615   6.1580987  -0.75658675  -24.43069  23.65243  -11.18031
+   2  0.0000794812  -2.437831   1.5382544  -1.779136678   9.9564912  -0.70590524  -25.74333  23.10433  -11.57520
+   3 -0.0005709598  -5.140423   0.2617188  -1.144619273   7.8978095  -0.52537640  -27.53283  22.53457  -12.68836
+   4 -0.0003543035  -4.333899   3.1338272  -1.938025976   8.5230994  -0.20404637  -29.39276  21.75854  -13.35939
+   5 -0.0017371797  -4.135100   0.6067619  -0.008076702  -0.9087045  -1.57366593  -31.23286  21.07104  -14.41252
+   6 -0.0012831063  -1.806275   3.6440667  -2.393721847  -3.3302690  -0.02333614  -32.65311  20.01826  -14.79434
 
 
-Since we're doing regression, we need lag our variables by 1 (our chosen lag):
+Since we're doing regression, we need lag our variables by 1 (our chosen lag): 
 
 .. code-block:: r
 
@@ -556,8 +554,6 @@ Since we're doing regression, we need lag our variables by 1 (our chosen lag):
          select(my_var, contains(".l"), trend) # accessing the data model of VAR (lags our variables 1)
 
       rownames(mat) <- NULL
-
-      mat['trend'] = 1: nrow(mat)
 
 Thus our final input data is as follows:
 
@@ -572,7 +568,7 @@ Thus our final input data is as follows:
    6 -0.0012411767 -0.0012831063 -1.806275  3.6440667 -2.393721847 -3.3302690  -0.02333614 -32.65311  20.01826  -14.79434    6
 
 
-Next we need to choose which variables we want to include in our linear equation (to generate GTVPs). Here, we're going to choose :math:`X_t` to include the lag of the dependent variable and the lag on the first 3 factors (F_1, F_2, and F_3). These are positioned at columns 2,3,4 and 5 respectively:
+Next we need to choose which variables we want to include in our linear equation (to generate GTVPs). Here, we're going to choose :math:`X_t` to include the lag of the dependent variable and the lag on the first 2 factors (F_1 and F_2). These are positioned at columns 2,3 and 4 respectively:
 
 And with all of that out of the way, it's time to fit MRF! 
 
@@ -581,7 +577,7 @@ And with all of that out of the way, it's time to fit MRF!
       x_pos = c(2,3,4)
 
       model <- MRF(mat, 
-         x.pos = x_pos[-c(3:6)],  
+         x.pos = x_pos,  
          oos.pos = nrow(mat),
          ridge.lambda = .001, 
          rw.regul = .9,
@@ -610,12 +606,16 @@ This gives us our predicted log-difference. Now we have to convert that back to 
    
    [1] 495.2879
 
-And there we have it, our final forecasted value is 547.6148. If we want, we can also access the pre-ensembled forecasts:
+And there we have it, our final forecasted value is 495.2879. If we want, we can also access the pre-ensembled forecasts:
 
 .. code-block:: r
 
    d <- 149629 * exp(model$pred.ensemble) - 149629
    d_df <- data.frame(d)
+
+   print(median(d))
+
+   [1] 510.0469
 
 Let's visualise the range of our pre-ensembled forecasts by plotting the distribution:
 
@@ -640,12 +640,7 @@ Let's visualise the range of our pre-ensembled forecasts by plotting the distrib
 
 .. image:: /images/distplot.png
 
-We can also look at the GTVPs to visualise the change in the coefficients corresponding to the constant (:math:`\beta_0`, top-left), the lagged dependent variable (:math:`\beta_1`, top-right) and the rest of the principal components corresponding to our chosen :math:`X_t`.
+We can also look at the GTVPs to visualise the change in the coefficients corresponding to the constant (:math:`\beta_{0,t}`, top-left), the lagged dependent variable (:math:`\beta_{1,t}`, top-right) and the two principal factors (:math:`\beta_{2,t}` and :math:`\beta_{3,t}`, bottom).
 
-.. image:: /images/New_betas.svg
+.. image:: /images/New_betas.png
 
-
-Implementation Example: Multi-Step Macro Forecasting
-+++++++++++++++++++++++++++
-
-... Coming Soon

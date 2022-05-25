@@ -46,14 +46,12 @@
 <li class="toctree-l2"><a class="reference internal" href="#python">Python</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#implementation-example-simple-one-step-forecasting">Implementation Example: Simple One-Step Forecasting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#implementation-example-one-step-macro-forecasting">Implementation Example: One-Step Macro Forecasting</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#implementation-example-multi-step-macro-forecasting">Implementation Example: Multi-Step Macro Forecasting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#implementation-example-financial-trading">Implementation Example: Financial Trading</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#r">R</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#id2">Implementation Example: Simple One-Step Forecasting</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#id3">Implementation Example: One-Step Macro Forecasting</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#id4">Implementation Example: Multi-Step Macro Forecasting</a></li>
 </ul>
 </li>
 </ul>
@@ -86,7 +84,7 @@
   <section id="usage">
 <span id="id1"></span><h1>Usage<a class="headerlink" href="#usage" title="Permalink to this headline"></a></h1>
 <p>The following provide instructive examples on how to run MRF to generate forecasts and generalized time-varying parameters (GTVPs).</p>
-<p>It is recommended that you see <a class="reference internal" href="modules.html#docs"><span class="std std-ref">Docs</span></a>, particularly the MRF module, before you proceed. You can proceed with the below as an example of how to get started.</p>
+<p>It is recommended that you see <a class="reference internal" href="modules.html#docs"><span class="std std-ref">Docs</span></a>, particularly the MRF module, to get an overview of the hyperparameters. Below we provide examples of how to get started running MRF.</p>
 <section id="python">
 <h2>Python<a class="headerlink" href="#python" title="Permalink to this headline"></a></h2>
 <section id="implementation-example-simple-one-step-forecasting">
@@ -192,6 +190,7 @@
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">MRF</span> <span class="kn">import</span> <span class="o">*</span>
 <span class="kn">import</span> <span class="nn">seaborn</span> <span class="k">as</span> <span class="nn">sns</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">statistics</span> <span class="k">as</span> <span class="nn">stats</span>
 </pre></div>
 </div>
 <p>To download the FREDMD data set, we simply need to scrape it from a Google Drive link as follows:</p>
@@ -211,24 +210,21 @@
 <span class="mi">5</span>    <span class="o">-</span><span class="mf">0.001283</span>   <span class="o">-</span><span class="mf">0.001737</span>  <span class="o">-</span><span class="mf">4.135100</span>   <span class="mf">0.606762</span>  <span class="o">-</span><span class="mf">0.008077</span>  <span class="o">-</span><span class="mf">0.908704</span>  <span class="o">-</span><span class="mf">1.573666</span>  <span class="o">-</span><span class="mf">31.232862</span>   <span class="mf">21.071040</span>  <span class="o">-</span><span class="mf">14.412521</span>    <span class="mi">5</span>
 </pre></div>
 </div>
-<p>We can now go about defining our forecasting setup. Our goal is to forecast non-farm payrolls, so we’ll set that as our dependent variable. As predictors, we’re going to have the first three principal factors FA and MAF included in our linear equation all at a lag of one (these will be our <span class="math notranslate nohighlight">\(X_t\)</span>). We’re going to make predictions on a one-period forecast horizon:</p>
+<p>We can now go about defining our forecasting setup. Our goal is to forecast non-farm payrolls, so we’ll set that as our dependent variable. As predictors, we’re going to have the first two principal factors and a lag on the dependent variable included in our linear equation (these will be our <span class="math notranslate nohighlight">\(X_t\)</span>). We’re going to make predictions on a one-period forecast horizon:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">### Dependent Variable</span>
 <span class="n">my_var</span> <span class="o">=</span> <span class="s2">&quot;PAYEMS&quot;</span>
 <span class="n">y_pos</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">get_loc</span><span class="p">(</span><span class="n">my_var</span><span class="p">)</span>
 
 <span class="c1">### Exogenous Variables</span>
-<span class="n">x_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;PAYEMS.l1&quot;</span><span class="p">,</span> <span class="s1">&#39;F_1.l1&#39;</span><span class="p">,</span> <span class="s1">&#39;F_2.l1&#39;</span><span class="p">]</span>
+<span class="n">x_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;F_1.l1&quot;</span><span class="p">,</span> <span class="s2">&quot;F_2.l1&quot;</span><span class="p">,</span> <span class="s2">&quot;PAYEMS.l1&quot;</span><span class="p">]</span>
 <span class="n">x_pos</span> <span class="o">=</span> <span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">get_loc</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">x_vars</span><span class="p">]</span>
-
-<span class="c1">### Forecast Horizon</span>
-<span class="n">hor</span> <span class="o">=</span> <span class="mi">1</span>
 </pre></div>
 </div>
 <p>We’re going to set our out-of-sample position to be only the last value, since we are only interested in predicting the next value for non-farm payrolls.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">oos_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">oos_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
 </pre></div>
 </div>
-<p>Now we’re ready to fit MRF! We’re going to pass in the <code class="code docutils literal notranslate"><span class="pre">y_pos</span></code> and <code class="code docutils literal notranslate"><span class="pre">x_pos</span></code> we defined above. We are using <code class="code docutils literal notranslate"><span class="pre">ridge_lambda</span> <span class="pre">=</span> <span class="pre">0.3</span></code> as our ridge regularisation <span class="math notranslate nohighlight">\(\lambda\)</span>. We are going to set <code class="code docutils literal notranslate"><span class="pre">parallelise</span> <span class="pre">=</span> <span class="pre">True</span></code> and <code class="code docutils literal notranslate"><span class="pre">n_cores</span> <span class="pre">=</span> <span class="pre">-1</span></code> to run MRF across all cores on our machine in parallel.</p>
+<p>Now we’re ready to fit MRF! We’re going to pass in the <code class="code docutils literal notranslate"><span class="pre">y_pos</span></code> and <code class="code docutils literal notranslate"><span class="pre">x_pos</span></code> we defined above. We are using <code class="code docutils literal notranslate"><span class="pre">ridge_lambda</span> <span class="pre">=</span> <span class="pre">0.001</span></code> as our ridge regularisation <span class="math notranslate nohighlight">\(\lambda\)</span>. We are going to set <code class="code docutils literal notranslate"><span class="pre">parallelise</span> <span class="pre">=</span> <span class="pre">True</span></code> and <code class="code docutils literal notranslate"><span class="pre">n_cores</span> <span class="pre">=</span> <span class="pre">-1</span></code> to run MRF across all cores on our machine in parallel. For descriptions of the other hyperparameters, see <a class="reference internal" href="modules.html#docs"><span class="std std-ref">Docs</span></a>.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">MRF</span> <span class="o">=</span> <span class="n">MacroRandomForest</span><span class="p">(</span><span class="n">data</span> <span class="o">=</span> <span class="n">df</span><span class="p">,</span>
                      <span class="n">y_pos</span> <span class="o">=</span> <span class="n">y_pos</span><span class="p">,</span>
                      <span class="n">x_pos</span> <span class="o">=</span> <span class="n">x_pos</span><span class="p">,</span>
@@ -254,7 +250,7 @@
 
 <span class="nb">print</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span>
 
-<span class="mf">0.003269</span>
+<span class="mf">0.003268</span>
 </pre></div>
 </div>
 <p>This gives us our predicted log-difference. Now we have to convert that back to the original units:</p>
@@ -262,11 +258,15 @@
 
 <span class="nb">print</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
 
-<span class="mf">489.9376</span>
+<span class="mf">489.8096</span>
 </pre></div>
 </div>
-<p>And there we have it, our final forecasted value is 489.9376. If we want, we can also access the pre-ensembled forecasts:</p>
+<p>And there we have it, our final forecasted value is 489.8096. If we want, we can also access the pre-ensembled forecasts:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">=</span> <span class="p">[</span><span class="mi">149629</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">))</span> <span class="o">-</span> <span class="mi">149629</span> <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">MRF_output</span><span class="p">[</span><span class="s1">&#39;pred_ensemble&#39;</span><span class="p">]]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">stats</span><span class="o">.</span><span class="n">median</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
+
+<span class="mf">510.3907</span>
 </pre></div>
 </div>
 <p>Let’s visualise the range of our pre-ensembled forecasts by plotting the distribution:</p>
@@ -285,12 +285,8 @@
 </pre></div>
 </div>
 <img alt="_images/Python_nfpr.png" src="_images/Python_nfpr.png" />
-<p>We can also look at the GTVPs to visualise the change in the coefficients corresponding to the constant (<span class="math notranslate nohighlight">\(\beta_0\)</span>, top-left), the lagged dependent variable (<span class="math notranslate nohighlight">\(\beta_1\)</span>, top-right) and the rest of the principal components corresponding to our chosen <span class="math notranslate nohighlight">\(X_t\)</span>.</p>
+<p>We can also look at the GTVPs to visualise the change in the coefficients corresponding to the constant (<span class="math notranslate nohighlight">\(\beta_{0,t}\)</span>, top-left), the lagged dependent variable (<span class="math notranslate nohighlight">\(\beta_{1,t}\)</span>, top-right) and the two principal factors (<span class="math notranslate nohighlight">\(\beta_{2,t}\)</span> and <span class="math notranslate nohighlight">\(\beta_{3,t}\)</span>, bottom).</p>
 <img alt="_images/Python_nfpr_GTVPs_2.png" src="_images/Python_nfpr_GTVPs_2.png" />
-</section>
-<section id="implementation-example-multi-step-macro-forecasting">
-<h3>Implementation Example: Multi-Step Macro Forecasting<a class="headerlink" href="#implementation-example-multi-step-macro-forecasting" title="Permalink to this headline"></a></h3>
-<p>… Coming Soon</p>
 </section>
 <section id="implementation-example-financial-trading">
 <h3>Implementation Example: Financial Trading<a class="headerlink" href="#implementation-example-financial-trading" title="Permalink to this headline"></a></h3>
@@ -447,7 +443,7 @@
 <span class="n">df_for_names</span> <span class="o">&lt;-</span> <span class="nf">read_csv</span><span class="p">(</span><span class="s">&quot;https://files.stlouisfed.org/files/htdocs/fred-md/monthly/2022-02.csv&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Taking a look at the data frame, we have 229 rows and 127 columns (not all shown here):</p>
+<p>Taking a look at the data frame, we have 229 rows and 127 columns (not all shown here). This dataframe starts from index 529 because we have sliced the FREDMD database:</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">print</span><span class="p">(</span><span class="nf">head</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
 
           <span class="n">RPI</span>        <span class="n">W875RX1</span>     <span class="n">DPCERA3M086SBEA</span>  <span class="kc">...</span>        <span class="n">INVEST</span>    <span class="n">VIXCLSx</span>
@@ -510,12 +506,12 @@
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">print</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
 
         <span class="n">PAYEMS</span>       <span class="n">F_1</span>         <span class="n">F_2</span>         <span class="n">F_3</span>           <span class="n">F_4</span>          <span class="n">F_5</span>        <span class="n">MAF_1</span>     <span class="n">MAF_2</span>     <span class="n">MAF_3</span>
-<span class="m">60</span>  <span class="m">0.0007806966</span>  <span class="m">-3.448621</span>  <span class="m">-3.7578079</span>   <span class="m">2.135086615</span>   <span class="m">6.1580987</span>  <span class="m">-0.75658675</span>  <span class="m">-24.43069</span>  <span class="m">23.65243</span>  <span class="m">-11.18031</span>
-<span class="m">61</span>  <span class="m">0.0000794812</span>  <span class="m">-2.437831</span>   <span class="m">1.5382544</span>  <span class="m">-1.779136678</span>   <span class="m">9.9564912</span>  <span class="m">-0.70590524</span>  <span class="m">-25.74333</span>  <span class="m">23.10433</span>  <span class="m">-11.57520</span>
-<span class="m">62</span> <span class="m">-0.0005709598</span>  <span class="m">-5.140423</span>   <span class="m">0.2617188</span>  <span class="m">-1.144619273</span>   <span class="m">7.8978095</span>  <span class="m">-0.52537640</span>  <span class="m">-27.53283</span>  <span class="m">22.53457</span>  <span class="m">-12.68836</span>
-<span class="m">63</span> <span class="m">-0.0003543035</span>  <span class="m">-4.333899</span>   <span class="m">3.1338272</span>  <span class="m">-1.938025976</span>   <span class="m">8.5230994</span>  <span class="m">-0.20404637</span>  <span class="m">-29.39276</span>  <span class="m">21.75854</span>  <span class="m">-13.35939</span>
-<span class="m">64</span> <span class="m">-0.0017371797</span>  <span class="m">-4.135100</span>   <span class="m">0.6067619</span>  <span class="m">-0.008076702</span>  <span class="m">-0.9087045</span>  <span class="m">-1.57366593</span>  <span class="m">-31.23286</span>  <span class="m">21.07104</span>  <span class="m">-14.41252</span>
-<span class="m">65</span> <span class="m">-0.0012831063</span>  <span class="m">-1.806275</span>   <span class="m">3.6440667</span>  <span class="m">-2.393721847</span>  <span class="m">-3.3302690</span>  <span class="m">-0.02333614</span>  <span class="m">-32.65311</span>  <span class="m">20.01826</span>  <span class="m">-14.79434</span>
+<span class="m">1</span>  <span class="m">0.0007806966</span>  <span class="m">-3.448621</span>  <span class="m">-3.7578079</span>   <span class="m">2.135086615</span>   <span class="m">6.1580987</span>  <span class="m">-0.75658675</span>  <span class="m">-24.43069</span>  <span class="m">23.65243</span>  <span class="m">-11.18031</span>
+<span class="m">2</span>  <span class="m">0.0000794812</span>  <span class="m">-2.437831</span>   <span class="m">1.5382544</span>  <span class="m">-1.779136678</span>   <span class="m">9.9564912</span>  <span class="m">-0.70590524</span>  <span class="m">-25.74333</span>  <span class="m">23.10433</span>  <span class="m">-11.57520</span>
+<span class="m">3</span> <span class="m">-0.0005709598</span>  <span class="m">-5.140423</span>   <span class="m">0.2617188</span>  <span class="m">-1.144619273</span>   <span class="m">7.8978095</span>  <span class="m">-0.52537640</span>  <span class="m">-27.53283</span>  <span class="m">22.53457</span>  <span class="m">-12.68836</span>
+<span class="m">4</span> <span class="m">-0.0003543035</span>  <span class="m">-4.333899</span>   <span class="m">3.1338272</span>  <span class="m">-1.938025976</span>   <span class="m">8.5230994</span>  <span class="m">-0.20404637</span>  <span class="m">-29.39276</span>  <span class="m">21.75854</span>  <span class="m">-13.35939</span>
+<span class="m">5</span> <span class="m">-0.0017371797</span>  <span class="m">-4.135100</span>   <span class="m">0.6067619</span>  <span class="m">-0.008076702</span>  <span class="m">-0.9087045</span>  <span class="m">-1.57366593</span>  <span class="m">-31.23286</span>  <span class="m">21.07104</span>  <span class="m">-14.41252</span>
+<span class="m">6</span> <span class="m">-0.0012831063</span>  <span class="m">-1.806275</span>   <span class="m">3.6440667</span>  <span class="m">-2.393721847</span>  <span class="m">-3.3302690</span>  <span class="m">-0.02333614</span>  <span class="m">-32.65311</span>  <span class="m">20.01826</span>  <span class="m">-14.79434</span>
 </pre></div>
 </div>
 <p>Since we’re doing regression, we need lag our variables by 1 (our chosen lag):</p>
@@ -526,8 +522,6 @@
    <span class="nf">select</span><span class="p">(</span><span class="n">my_var</span><span class="p">,</span> <span class="nf">contains</span><span class="p">(</span><span class="s">&quot;.l&quot;</span><span class="p">),</span> <span class="n">trend</span><span class="p">)</span> <span class="c1"># accessing the data model of VAR (lags our variables 1)</span>
 
 <span class="nf">rownames</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span> <span class="o">&lt;-</span> <span class="kc">NULL</span>
-
-<span class="n">mat</span><span class="p">[</span><span class="s">&#39;trend&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="m">1</span><span class="o">:</span> <span class="nf">nrow</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Thus our final input data is as follows:</p>
@@ -540,12 +534,12 @@
 <span class="m">6</span> <span class="m">-0.0012411767</span> <span class="m">-0.0012831063</span> <span class="m">-1.806275</span>  <span class="m">3.6440667</span> <span class="m">-2.393721847</span> <span class="m">-3.3302690</span>  <span class="m">-0.02333614</span> <span class="m">-32.65311</span>  <span class="m">20.01826</span>  <span class="m">-14.79434</span>    <span class="m">6</span>
 </pre></div>
 </div>
-<p>Next we need to choose which variables we want to include in our linear equation (to generate GTVPs). Here, we’re going to choose <span class="math notranslate nohighlight">\(X_t\)</span> to include the lag of the dependent variable and the lag on the first 3 factors (F_1, F_2, and F_3). These are positioned at columns 2,3,4 and 5 respectively:</p>
+<p>Next we need to choose which variables we want to include in our linear equation (to generate GTVPs). Here, we’re going to choose <span class="math notranslate nohighlight">\(X_t\)</span> to include the lag of the dependent variable and the lag on the first 2 factors (F_1 and F_2). These are positioned at columns 2,3 and 4 respectively:</p>
 <p>And with all of that out of the way, it’s time to fit MRF!</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">x_pos</span> <span class="o">=</span> <span class="nf">c</span><span class="p">(</span><span class="m">2</span><span class="p">,</span><span class="m">3</span><span class="p">,</span><span class="m">4</span><span class="p">)</span>
 
 <span class="n">model</span> <span class="o">&lt;-</span> <span class="nf">MRF</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span>
-   <span class="n">x.pos</span> <span class="o">=</span> <span class="n">x_pos</span><span class="p">[</span><span class="o">-</span><span class="nf">c</span><span class="p">(</span><span class="m">3</span><span class="o">:</span><span class="m">6</span><span class="p">)],</span>
+   <span class="n">x.pos</span> <span class="o">=</span> <span class="n">x_pos</span><span class="p">,</span>
    <span class="n">oos.pos</span> <span class="o">=</span> <span class="nf">nrow</span><span class="p">(</span><span class="n">mat</span><span class="p">),</span>
    <span class="n">ridge.lambda</span> <span class="o">=</span> <span class="n">.</span><span class="m">001</span><span class="p">,</span>
    <span class="n">rw.regul</span> <span class="o">=</span> <span class="n">.</span><span class="m">9</span><span class="p">,</span>
@@ -571,9 +565,13 @@
 <span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="m">495.2879</span>
 </pre></div>
 </div>
-<p>And there we have it, our final forecasted value is 547.6148. If we want, we can also access the pre-ensembled forecasts:</p>
+<p>And there we have it, our final forecasted value is 495.2879. If we want, we can also access the pre-ensembled forecasts:</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">d</span> <span class="o">&lt;-</span> <span class="m">149629</span> <span class="o">*</span> <span class="nf">exp</span><span class="p">(</span><span class="n">model</span><span class="o">$</span><span class="n">pred.ensemble</span><span class="p">)</span> <span class="o">-</span> <span class="m">149629</span>
 <span class="n">d_df</span> <span class="o">&lt;-</span> <span class="nf">data.frame</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+<span class="nf">print</span><span class="p">(</span><span class="nf">median</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
+
+<span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="m">510.0469</span>
 </pre></div>
 </div>
 <p>Let’s visualise the range of our pre-ensembled forecasts by plotting the distribution:</p>
@@ -596,11 +594,8 @@
 </pre></div>
 </div>
 <img alt="_images/distplot.png" src="_images/distplot.png" />
-<p>We can also look at the GTVPs to visualise the change in the coefficients corresponding to the constant (<span class="math notranslate nohighlight">\(\beta_0\)</span>, top-left), the lagged dependent variable (<span class="math notranslate nohighlight">\(\beta_1\)</span>, top-right) and the rest of the principal components corresponding to our chosen <span class="math notranslate nohighlight">\(X_t\)</span>.</p>
-<img alt="images/New_betas.svg" src="images/New_betas.svg" /></section>
-<section id="id4">
-<h3>Implementation Example: Multi-Step Macro Forecasting<a class="headerlink" href="#id4" title="Permalink to this headline"></a></h3>
-<p>… Coming Soon</p>
+<p>We can also look at the GTVPs to visualise the change in the coefficients corresponding to the constant (<span class="math notranslate nohighlight">\(\beta_{0,t}\)</span>, top-left), the lagged dependent variable (<span class="math notranslate nohighlight">\(\beta_{1,t}\)</span>, top-right) and the two principal factors (<span class="math notranslate nohighlight">\(\beta_{2,t}\)</span> and <span class="math notranslate nohighlight">\(\beta_{3,t}\)</span>, bottom).</p>
+<img alt="_images/New_betas.png" src="_images/New_betas.png" />
 </section>
 </section>
 </section>
