@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>How it works &mdash; Macro Random Forest 1.0 documentation</title>
@@ -103,7 +103,7 @@ y_t = X_t \beta_t  + \varepsilon_t
 \begin{aligned}
 \begin{aligned}\label{OLS}
 (j^*, c^*) = \min _{j \in \mathcal{J}^{-}, \; c \in \mathbb{R}} &amp;\left[\min _{\beta_{1}} \sum_{\left\{t \in l \mid S_{j, t} \leq c\right\}}\left(y_{t}-X_{t} \beta_{1}\right)^{2}+\lambda\left\|\beta_{1}\right\|_{2}\right.\\
- &amp;\left.+\min _{\beta_{2}} \sum_{\left\{t \in l \mid S_{j, r}&gt;c\right\}}\left(y_{t}-X_{t} \beta_{2}\right)^{2}+\lambda\left\|\beta_{2}\right\|_{2}\right]
+ &amp;\left.+\min _{\beta_{2}} \sum_{\left\{t \in l \mid S_{j, t}&gt;c\right\}}\left(y_{t}-X_{t} \beta_{2}\right)^{2}+\lambda\left\|\beta_{2}\right\|_{2}\right]
 \end{aligned}
 \end{aligned} \label{a} \tag{1}
 \end{equation*}\end{split}\]</div>

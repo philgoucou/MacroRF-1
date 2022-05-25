@@ -642,7 +642,7 @@ Let's visualise the range of our pre-ensembled forecasts by plotting the distrib
 
 We can also look at the GTVPs to visualise the change in the coefficients corresponding to the constant (:math:`\beta_0`, top-left), the lagged dependent variable (:math:`\beta_1`, top-right) and the rest of the principal components corresponding to our chosen :math:`X_t`.
 
-.. image:: /images/New_betas.png
+.. image:: /images/New_betas.svg
 
 
 Implementation Example: Multi-Step Macro Forecasting

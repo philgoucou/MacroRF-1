@@ -149,7 +149,7 @@ To download the FREDMD data set, we simply need to scrape it from a Google Drive
 
 .. code-block:: python
 
-   url='https://drive.google.com/file/d/1qYigHu6mygtmxceLTGACV206u7RQsopq/view?usp=sharing'
+   url='https://drive.google.com/file/d/1CB3ljKymznbExcMb9ckO4c2qaBuQxxHB/view?usp=sharing'
    url='https://drive.google.com/uc?id=' + url.split('/')[-2]
    df = pd.read_csv(url, index_col = "Unnamed: 0").reset_index(drop = True)
 
@@ -175,7 +175,7 @@ We can now go about defining our forecasting setup. Our goal is to forecast non-
    y_pos = df.columns.get_loc(my_var)
 
    ### Exogenous Variables
-   x_vars = ["PAYEMS.l1", 'F_1.l1', 'F_2.l1', 'F_3.l1', 'MAF_1.l1', 'MAF_2.l1', 'MAF_3.l1']
+   x_vars = ["PAYEMS.l1", 'F_1.l1', 'F_2.l1']
    x_pos = [df.columns.get_loc(x) for x in x_vars]
 
    ### Forecast Horizon
@@ -192,16 +192,19 @@ Now we're ready to fit MRF! We're going to pass in the :code:`y_pos` and :code:`
 .. code-block:: python
 
    MRF = MacroRandomForest(data = df,
-                           y_pos = y_pos,
-                           x_pos = x_pos, 
-                           B = 250, 
-                           ridge_lambda=0.3,
-                           parallelise = True,
-                           n_cores = -1,
-                           oos_pos = oos_pos,
-                           trend_push = 6,
-                           quantile_rate = 0.3, 
-                           fast_rw = True)
+                        y_pos = y_pos,
+                        x_pos = x_pos,
+                        B = 1000, 
+                        parallelise = True,
+                        n_cores = 3,
+                        resampling_opt = 2,
+                        oos_pos = oos_pos,
+                        trend_push = 6,
+                        quantile_rate = 0.3, 
+                        ridge_lambda=0.001,
+                        rw_regul=0.9,
+                        print_b = True,
+                        fast_rw = False)
 
 Now to fit MRF we just need to run:
 
@@ -217,7 +220,7 @@ That's it! Our models are fit and the training is finished. All we need to do no
 
    print(pred)
 
-   0.0036531595778754606
+   0.003269
 
 This gives us our predicted log-difference. Now we have to convert that back to the original units:
 
@@ -227,9 +230,9 @@ This gives us our predicted log-difference. Now we have to convert that back to 
 
    print(y)
 
-   547.6182739258802
+   489.9376
 
-And there we have it, our final forecasted value is 547.6182739258802. If we want, we can also access the pre-ensembled forecasts:
+And there we have it, our final forecasted value is 489.9376. If we want, we can also access the pre-ensembled forecasts:
 
 .. code-block:: python
 
@@ -261,69 +264,7 @@ We can also look at the GTVPs to visualise the change in the coefficients corres
 Implementation Example: Multi-Step Macro Forecasting
 +++++++++++++++++++++++++++
 
-Let's say that our goal is to forecast inflation (CPI) three periods ahead using the principal components (factors) of the FRED macroeconomic database (FREDMD).
-
-Firstly, we will need to load MRF.
-
-.. code-block:: python
-
-   from MRF import *
-
-To download our FREDMD data set, we simply need to scrape it from a Google Drive link as follows:
-
-.. code-block:: python
-
-   url='https://drive.google.com/file/d/1AG7oUfG03wH6-OPFm0sxdsAcutt2jdbn/view?usp=sharing'
-   url='https://drive.google.com/uc?id=' + url.split('/')[-2]
-   df = pd.read_csv(url, index_col = "Unnamed: 0").reset_index(drop = True)
-
-We can take a look at this dataset before we proceed:
-
-.. code-block:: python
-
-   index  CPIAUCSL    F_1       F_2       F_3       F_4       F_5       MAF_1    MAF_2      MAF_3    Trend 
-
-   0      0.002158  1.173100  0.172975 -3.420704 -1.360721 -2.099334 -4.068628  4.708296 -13.407287      1 
-   1      0.001604  2.049119  0.785785 -3.070974 -0.773570 -1.854451 -4.226717  3.971370 -13.633706      2 
-   2     -0.002159  1.074777 -2.870071 -0.030658 -0.757934 -2.659571 -5.273620  3.157967 -12.326495      3 
-   3     -0.000005  1.588660 -2.648067 -1.283088  0.118267 -1.761513 -6.650085  2.691071 -10.964577      4 
-   4     -0.000538  1.728049 -3.852286 -1.425368 -4.038225 -0.612198 -8.065427  1.639973 -10.627529      5 
-
-Our goal is to forecast CPI, so we'll set that as our dependent variable. As predictors, we're going to have 5 factors (principal components) of the FREDMD database with the first three (our :math:`X_t`) included in our linear equation, all at a lag of three periods. Our data is going to start on Jan 1st 2003 and we're going to make predictions on a three-period forecast horizon:
-
-.. code-block:: python
-
-   ### Variable from FRED
-   my_var = "CPIAUCSL"
-   y_pos = df.columns.get_loc(my_var)
-
-   ### Number of factors
-   my_k = 5
-
-   ### First number of factors in linear eqn
-   my_x = 3
-
-   ### Lags
-   my_p = 3
-
-   ### Start Date
-   start_date = "2003-01-01"
-
-   ### Forecast Horizon
-   hor = 3
-
-We're going to want to save our forest output as we loop through to the eventual forecast horizon, so we'll create an array where the output can be stored. We can also set the seed for replicability:
-
-.. code-block:: r
-
-   r_list = []
-   np.random.seed(1234)
-
-And with all of that out of the way, it's time to fit MRF! We're going to conduct recursive forecasting by looping through from 1 until the eventual forecast horizon, each time setting our data matrix and the position of our variables that we want to be time-varying:
-
-.. code-block:: python
-
-
+... Coming Soon
 
 Implementation Example: Financial Trading
 +++++++++++++++++++++++++++
@@ -515,12 +456,12 @@ With our forecasting setup defined, let's read the data from FRED:
 .. code-block:: r
 
    # Reading the data from FRED
-   df <- fredmd(file = "https://files.stlouisfed.org/files/htdocs/fred-md/monthly/current.csv",
+   df <- fredmd(file = "https://files.stlouisfed.org/files/htdocs/fred-md/monthly/2022-02.csv",
                transform = TRUE,
                date_start = ymd(start_date))
    
    # Reading column names from FRED
-   df_for_names <- read_csv("https://files.stlouisfed.org/files/htdocs/fred-md/monthly/current.csv")
+   df_for_names <- read_csv("https://files.stlouisfed.org/files/htdocs/fred-md/monthly/2022-02.csv")
 
 Taking a look at the data frame, we have 229 rows and 127 columns (not all shown here):
 
@@ -631,23 +572,23 @@ Thus our final input data is as follows:
    6 -0.0012411767 -0.0012831063 -1.806275  3.6440667 -2.393721847 -3.3302690  -0.02333614 -32.65311  20.01826  -14.79434    6
 
 
-Next we need to choose which variables we want to include in our linear equation (to generate GTVPs). Here, we're going to choose :math:`X_t` to include the lag of the dependent variable and the lag on the first 3 factors (F and MAF):
+Next we need to choose which variables we want to include in our linear equation (to generate GTVPs). Here, we're going to choose :math:`X_t` to include the lag of the dependent variable and the lag on the first 3 factors (F_1, F_2, and F_3). These are positioned at columns 2,3,4 and 5 respectively:
 
 And with all of that out of the way, it's time to fit MRF! 
 
 .. code-block:: r
 
-      x_pos1 <- which(str_detect(colnames(mat), paste0(my_var, ".l", my_p, collapse = "|"))) # lag on the dependent variable
-      x_pos2 <- which(str_detect(colnames(mat), paste0("F_", 1:my_x, ".l", rep(1:my_p, each = my_x), collapse = "|"))) # lag on the factors
-      x_pos = c(x_pos1, x_pos2) # combine them
+      x_pos = c(2,3,4)
 
-      model <- MRF(mat, x.pos = x_pos,
-                        oos.pos = nrow(mat),
-                        ridge.lambda = 0.30,
-                        trend.push = 6,
-                        B = 250,
-                        quantile.rate = 0.3,
-                        fast.rw = TRUE)
+      model <- MRF(mat, 
+         x.pos = x_pos[-c(3:6)],  
+         oos.pos = nrow(mat),
+         ridge.lambda = .001, 
+         rw.regul = .9,
+         trend.push = 6,
+         B =1000,
+         quantile.rate = 0.3,
+         fast.rw = TRUE)
 
 That's it! Our models are fit and the training is finished. All we need to do now is to access our predictions.
 
@@ -657,7 +598,7 @@ That's it! Our models are fit and the training is finished. All we need to do no
 
    print(preds)
 
-   [1] 0.003653136
+   [1] 0.00330464
 
 This gives us our predicted log-difference. Now we have to convert that back to the original units:
 
@@ -667,7 +608,7 @@ This gives us our predicted log-difference. Now we have to convert that back to 
 
    print(y)
    
-   [1] 547.6148
+   [1] 495.2879
 
 And there we have it, our final forecasted value is 547.6148. If we want, we can also access the pre-ensembled forecasts:
 
@@ -701,223 +642,10 @@ Let's visualise the range of our pre-ensembled forecasts by plotting the distrib
 
 We can also look at the GTVPs to visualise the change in the coefficients corresponding to the constant (:math:`\beta_0`, top-left), the lagged dependent variable (:math:`\beta_1`, top-right) and the rest of the principal components corresponding to our chosen :math:`X_t`.
 
-.. image:: /images/R_GTVPs_2_3.svg
+.. image:: /images/New_betas.svg
 
 
 Implementation Example: Multi-Step Macro Forecasting
 +++++++++++++++++++++++++++
 
-Let's say that our goal is to forecast inflation (CPI) three periods ahead using the FRED macroeconomic database (FREDMD).
-
-Firstly, we will need to load MRF. We will also load the fbi package, which let's us read and manipulate FRED data, and several other useful libraries.
-
-.. code-block:: r
-
-   library(MacroRF)
-   library(fbi)
-   library(tidyverse)
-   library(lubridate)
-   library(vars)
-
-
-Our goal is to forecast CPI, so we'll set that as our dependent variable. As predictors, we're going to have 5 factors (principal components) of the FREDMD database with the first three (our :math:`X_t`) included in our linear equation, all at a lag of three periods. Our data is going to start on Jan 1st 2003 and we're going to make predictions on a three-period forecast horizon:
-
-.. code-block:: r
-
-   ### Variable from FRED
-   my_var <- "CPIAUCSL"
-
-   ### Number of factors
-   my_k <- 5
-
-   ### First number of factors in linear eqn
-   my_x <- 3
-
-   ### Lags
-   my_p <- 3
-
-   ### Start Date
-   start_date <- "2003-01-01"
-
-   ### Forecast Horizon
-   hor <- 3
-
-With our forecasting setup defined, let’s read the data from FRED:
-
-.. code-block:: r
-
-   df <- fredmd(file = "https://files.stlouisfed.org/files/htdocs/fred-md/monthly/current.csv",
-               transform = TRUE,
-               date_start = ymd(start_date))
-
-   df_for_names <- read_csv("https://files.stlouisfed.org/files/htdocs/fred-md/monthly/current.csv")
-
-
-Taking a look at the data frame, we have 229 rows and 127 columns (not all shown here):
-
-.. code-block:: r
-
-   print(head(df))
-
-             RPI        W875RX1     DPCERA3M086SBEA  ...        INVEST    VIXCLSx
-   529 -0.0032978454 -0.004065960   -0.0001315782    ...    -0.020117881  30.6685
-   530 -0.0037021507 -0.003959223   -0.0032350855    ...    -0.002235762  35.1947
-   531  0.0017066104  0.001560944    0.0057321149    ...    -0.002235762  35.1947
-   532  0.0046942035  0.004801033    0.0047141822    ...     0.001445046  27.1423
-   533  0.0077470739  0.007832646    0.0032133589    ...     0.009581121  22.5485
-   534  0.0035093161  0.003418945    0.0053366834    ...    -0.002602376  22.3490
-   535  0.0009887095  0.000777240    0.0045115509    ...    -0.017077098  21.2068
-
-Let's process the data, including handling outliers and missing values:
-
-
-.. code-block:: r
-
-   # Setting column names
-   colnames(df) <- colnames(df_for_names)
-
-   # Removing outliers in the series
-   df <- rm_outliers.fredmd(df)
-
-   df[["sasdate"]] <- NULL
-
-   # Handling missing values
-   imputed <- tw_apc(X = df,
-            kmax = my_k,
-            center = TRUE,
-            standardize = TRUE)
-
-   
-Let’s set up our matrix of factors using principal component analysis (PCA):
-
-.. code-block:: r
-
-   # Decomposing the data matrix into sparse, low-rank components
-   afm <- rpca(X = imputed[["data"]], 
-               kmax = my_k,
-               standardize = TRUE)
-
-   # Establishing and scaling robust PCA factors - the variables for our forecast
-   Fmat <- prcomp(scale(imputed[["data"]]), rank. = my_k)$x
-
-   # Encoding the predictors
-   ma_mat <- embed(scale(imputed[["data"]]), 12)
-
-   # Merge the matrices
-   ma_mat <- cbind(scale(imputed[["data"]]) %>% tail(nrow(ma_mat)), ma_mat)
-
-   # Decomposing the data matrix into sparse, low-rank components
-   MAFmat <- prcomp(ma_mat, rank. = my_x)$x
-
-Let’s set up our variables for easy access:
-
-.. code-block:: r
-
-   n <- nrow(MAFmat)
-   idx <- which(colnames(df) == my_var)
-   X <- imputed[["data"]][, idx]
-   X <- tail(X, n)
-   Fmat <- tail(Fmat, n)
-   Y <- cbind(X, Fmat, MAFmat)
-
-We can now take a look at our input data:
-
-.. code-block:: r
-
-   print(Y)
-
-         CPIAUCSL      F_1         F_2         F_3          F_4         F_5       MAF_1      MAF_2      MAF_3
-   12  2.158370e-03  1.173100   0.1729750  -3.42070409  -1.3607214  -2.0993337  -4.068628  4.7082964  -13.40729
-   13  1.604339e-03  2.049119   0.7857849  -3.07097371  -0.7735698  -1.8544508  -4.226717  3.9713696  -13.63371
-   14 -2.158623e-03  1.074777  -2.8700708  -0.03065825  -0.7579336  -2.6595706  -5.273620  3.1579670  -12.32650
-   15 -4.590208e-06  1.588660  -2.6480670  -1.28308755   0.1182666  -1.7615131  -6.650085  2.6910707  -10.96458
-   16 -5.380462e-04  1.728049  -3.8522863  -1.42536771  -4.0382254  -0.6121978  -8.065427  1.6399727  -10.62753
-   17  2.657721e-03  3.827819  -1.4023308  -1.44571729  -5.2314203  -1.8990988  -8.841191  0.2838795  -11.98170
-
-We're going to want to save our forest output as we loop through to the eventual forecast horizon, so we'll create an array where the output can be stored. We can also set the seed for replicability:
-
-.. code-block:: r
-
-   r_list <- list()
-   set.seed(1234)
-
-And with all of that out of the way, it's time to fit MRF! We're going to conduct recursive forecasting by looping through from 1 until the eventual forecast horizon, each time setting our data matrix and the position of our variables that we want to be time-varying:
-
-.. code-block:: r
-
-   for(i in 1:hor) {
-
-   if(i == 1) {
-      Y_temp <- Y[c(1:nrow(Y), nrow(Y)), ]
-      mat <- VAR(Y_temp, p = i + my_p - 1, type = "trend")[["datamat"]] %>%
-         as.data.frame() %>%
-         select(my_var, contains(".l"), trend)
-
-      rownames(mat) <- NULL
-      x_pos1 <- which(str_detect(colnames(mat), paste0("F_", 1:my_x, ".l", rep(1:my_p, each = my_x), collapse = "|")))
-      x_pos2 <- which(str_detect(colnames(mat), paste0(my_var, ".l", i, collapse = "|")))
-      x_pos = c(x_pos1, x_pos2)
-      r_list[[i]] <- MRF(mat, x.pos = x_pos,
-                        oos.pos = nrow(mat),
-                        ridge.lambda = 0.30,
-                        rw.regul = 0.80, 
-                        trend.push = 6,
-                        B = 40,
-                        fast.rw = TRUE)
-   } 
-   
-   else if(i > 1) {
-      Y_temp <- Y[c(1:nrow(Y), rep(nrow(Y), i)), ]
-      sel_rm <- paste0(".l", 1:(i-1), collapse = "|")
-      mat <- VAR(Y, p = i + my_p, type = "trend")[["datamat"]] %>%
-         as.data.frame() %>%
-         select(my_var, contains(".l"), trend) %>% 
-         select(-matches(sel_rm))
-      rownames(mat) <- NULL
-      mat[,1]=mat[,1]*1200
-      
-      x_pos1 <- which(str_detect(colnames(mat), paste0("F_", 1:my_x, ".l", rep(i:(my_p + i), each = my_x), collapse = "|")))
-      x_pos2 <- which(str_detect(colnames(mat), paste0(my_var, ".l", i, collapse = "|")))
-      r_list[[i]] <- MRF(mat, x.pos = x_pos,
-                        oos.pos = nrow(mat),
-                        ridge.lambda = 0.30,
-                        rw.regul = 0.80, 
-                        trend.push = 6 + i,
-                        B = 40)
-      
-   }
-   }
-
-That's it! Our models are fit and the training is finished. All we need to do now is to assign our predictions for easy access.
-
-.. code-block:: r
-
-   preds <- c()
-   for(i in 1:hor) preds[i] <- r_list[[i]][["pred"]]
-   preds <- sapply(r_list, function(x) x[["pred"]])
-
-   print(preds)
-   [1] -0.00156105  0.52877814  0.79409874
-
-Now we have our three-step predictions for the log-difference. All that's left to do is to convert that back to the original CPI units:
-
-.. code-block:: r
-
-   cpi <- c(259.007,258.165,256.094,255.944,257.217,258.543,259.580,260.190,260.352,260.721,261.564,262.200,263.346,265.028,266.727,
-   268.599,270.955,272.184,273.092,274.214,276.590,278.524,280.126,281.933)
-
-   last_log_diff <- log(cpi[24]) - log(cpi[23])
-   new_log_diff <- last_log_diff + preds
-
-   new_log_diff
-   new_cpis <- cpi[24] * cumprod(exp(new_log_diff))
-
-   cpis_mm <- (quantmod::Delt(c(cpi[24], new_cpis), k = 1) * 100) %>% na.omit() %>% as.numeric()
-   cpis_yy <- (quantmod::Delt(c(cpi, new_cpis), k = 12) * 100) %>% na.omit() %>% as.numeric() %>% tail(hor)
-
-   print(cpis_mm)
-   [1]   0.4778866  62.0491047 121.6319997
-
-   print(cpis_yy)
-   [1]   7.569631  73.209330 281.442012
-
+... Coming Soon

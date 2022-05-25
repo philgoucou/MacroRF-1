@@ -43,7 +43,7 @@ After randomising over rows, we then take a random subset of the predictors, cal
     \begin{aligned}
     \begin{aligned}\label{OLS}
     (j^*, c^*) = \min _{j \in \mathcal{J}^{-}, \; c \in \mathbb{R}} &\left[\min _{\beta_{1}} \sum_{\left\{t \in l \mid S_{j, t} \leq c\right\}}\left(y_{t}-X_{t} \beta_{1}\right)^{2}+\lambda\left\|\beta_{1}\right\|_{2}\right.\\
-     &\left.+\min _{\beta_{2}} \sum_{\left\{t \in l \mid S_{j, r}>c\right\}}\left(y_{t}-X_{t} \beta_{2}\right)^{2}+\lambda\left\|\beta_{2}\right\|_{2}\right] 
+     &\left.+\min _{\beta_{2}} \sum_{\left\{t \in l \mid S_{j, t}>c\right\}}\left(y_{t}-X_{t} \beta_{2}\right)^{2}+\lambda\left\|\beta_{2}\right\|_{2}\right] 
     \end{aligned}
     \end{aligned} \label{a} \tag{1}
     \end{equation*} 
